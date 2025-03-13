@@ -28,6 +28,9 @@ jobs:
       - name: Build and test
         run: ./mvnw clean verify
 
+      - name: Clean workspace
+        run: git clean -fdX
+
       - name: Prepare release
         run: ./mvnw release:prepare --batch-mode -Dusername=bonitasoft-presales -Dpassword=${{ secrets.GITHUB_TOKEN }}
 
