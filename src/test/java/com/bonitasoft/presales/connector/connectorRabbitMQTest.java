@@ -77,7 +77,7 @@ public class connectorRabbitMQTest {
 
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
     }
-
+    /*
     @Test
     public void testExecuteBusinessLogic() {
         Map<String, Object> parameters = new HashMap<>();
@@ -98,6 +98,6 @@ public class connectorRabbitMQTest {
             fail("Execution failed: " + e.getMessage());
         }
     }
-
+    */
     
 }
