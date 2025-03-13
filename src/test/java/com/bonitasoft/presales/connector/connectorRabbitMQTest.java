@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class connectorRabbitMQTest {
 
@@ -26,7 +28,7 @@ public class connectorRabbitMQTest {
         // Set valid input parameters using setInputParameters method
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(connectorRabbitMQ.HOST_INPUT_PARAMETER, "localhost");
-        parameters.put(connectorRabbitMQ.QUEUENAME_INPUT_PARAMETER, "testQueue");
+        parameters.put(connectorRabbitMQ.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
         parameters.put(connectorRabbitMQ.MESSAGE_INPUT_PARAMETER, "Hello, World!");
         connector.setInputParameters(parameters);
 
@@ -44,7 +46,7 @@ public class connectorRabbitMQTest {
         // Set valid input parameters using setInputParameters method
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(connectorRabbitMQ.HOST_INPUT_PARAMETER, 123); // This should be a string
-        parameters.put(connectorRabbitMQ.QUEUENAME_INPUT_PARAMETER, "testQueue");
+        parameters.put(connectorRabbitMQ.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
         parameters.put(connectorRabbitMQ.MESSAGE_INPUT_PARAMETER, "Hello, World!");
         connector.setInputParameters(parameters);
 
@@ -52,6 +54,49 @@ public class connectorRabbitMQTest {
         assertThrows(ConnectorValidationException.class, () -> {
             connector.validateInputParameters();
         });
+    }
+
+    @Test
+    public void testValidateInputParameters_invalidQueueName() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
+        parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, 456); // Invalid queueName type
+        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, "Hello, World!");
+        connector.setInputParameters(parameters);
+
+        assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
+    }
+
+    @Test
+    public void testValidateInputParameters_invalidMessage() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
+        parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
+        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, true); // Invalid message type
+        connector.setInputParameters(parameters);
+
+        assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
+    }
+
+    @Test
+    public void testExecuteBusinessLogic() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
+        parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
+        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, "Test Bonita Message");
+        parameters.put(RabbitMQConstants.USERNAME_INPUT_PARAMETER, "admin"); 
+        parameters.put(RabbitMQConstants.PASSWORD_INPUT_PARAMETER, "password"); 
+
+        connector.setInputParameters(parameters);
+        try {
+           
+            Map<String, Object> outputs = connector.execute();
+            assertThat(outputs)
+            .containsKey(RabbitMQConstants.RECEIVEDMESSAGE_OUTPUT_PARAMETER)
+            .satisfies(map -> assertThat(map.get(RabbitMQConstants.RECEIVEDMESSAGE_OUTPUT_PARAMETER)).isNotNull());
+        } catch (ConnectorException e) {
+            fail("Execution failed: " + e.getMessage());
+        }
     }
 
     

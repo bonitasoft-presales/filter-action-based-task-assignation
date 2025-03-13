@@ -8,7 +8,9 @@
     <!-- Connector inputs -->
     <input mandatory="true" name="host" type="java.lang.String" defaultValue="localhost"/>
     <input mandatory="true" name="queueName" type="java.lang.String"/>
-    <input mandatory="false" name="message" type="java.lang.String" defaultValue=""/>
+    <input mandatory="true" name="message" type="java.lang.String" defaultValue=""/>
+	<input mandatory="true" name="username" type="java.lang.String"/>
+	<input mandatory="true" name="password" type="java.lang.String"/>
  
     <!-- Connector outputs -->
     <output name="receivedMessage" type="java.lang.String"/>
