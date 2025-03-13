@@ -18,10 +18,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class connectorRabbitMQTest {
 
-	@Container
-    private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3-management")
-    .withAdminUser("testuser") 
-    .withAdminPassword("testpassword"); 
+	//@Container
+    //private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3-management")
+    //.withAdminUser("testuser")
+    //.withAccessToHost(true)
+    //.withAdminPassword("testpassword"); 
+    
 	
     connectorRabbitMQ connector;
 

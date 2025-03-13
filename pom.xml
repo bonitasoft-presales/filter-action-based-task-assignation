@@ -114,7 +114,6 @@
     </dependencies>
 
     <build>
-<<<<<<< Updated upstream
         <defaultGoal>package</defaultGoal>
         <resources>
             <resource>
@@ -200,68 +199,6 @@
             </plugin>
         </plugins>
     </build>
-=======
-	    <defaultGoal>package</defaultGoal>
-	    <resources>
-	        <resource>
-	            <directory>src/main/resources-filtered</directory>
-	            <filtering>true</filtering>
-	        </resource>
-	        <resource>
-	            <directory>src/main/resources</directory>
-	            <filtering>false</filtering>
-	        </resource>
-	    </resources>
-	    <pluginManagement>
-	        <plugins>
-	            <plugin>
-	                <artifactId>maven-assembly-plugin</artifactId>
-	                <version>${maven-assembly-plugin.version}</version>
-	            </plugin>
-	            <plugin>
-	                <groupId>org.codehaus.gmaven</groupId>
-	                <artifactId>groovy-maven-plugin</artifactId>
-	                <version>${groovy-maven-plugin.version}</version>
-	                <dependencies>
-	                    <dependency>
-	                        <groupId>org.codehaus.groovy</groupId>
-	                        <artifactId>groovy-xml</artifactId>
-	                        <version>${groovy-xml.version}</version>
-	                    </dependency>
-	                </dependencies>
-	                <executions>
-	                    <execution>
-	                        <id>default</id>
-	                        <phase>generate-resources</phase>
-	                        <goals>
-	                            <goal>execute</goal>
-	                        </goals>
-	                        <configuration>
-	                            <source>${project.basedir}/src/script/dependencies-as-var.groovy</source>
-	                        </configuration>
-	                    </execution>
-	                </executions>
-	            </plugin>
-	            <plugin>
-	                <groupId>org.apache.maven.plugins</groupId>
-	                <artifactId>maven-compiler-plugin</artifactId>
-	                <version>${maven-compiler-plugin.version}</version>
-	            </plugin>
-	            <plugin>
-	                <groupId>org.apache.maven.plugins</groupId>
-	                <artifactId>maven-surefire-plugin</artifactId>
-	                <version>${maven-surefire-plugin.version}</version>
-	            </plugin>
-	        </plugins>
-	    </pluginManagement>
-	    <plugins>
-	        <plugin>
-	            <groupId>org.apache.maven.plugins</groupId>
-	            <artifactId>maven-assembly-plugin</artifactId>
-	        </plugin>
-	    </plugins>
-	</build>
->>>>>>> Stashed changes
     <scm>
         <url>https://github.com/${github.owner}/${github.repo}</url>
         <developerConnection>scm:git:${project.scm.url}.git</developerConnection>
