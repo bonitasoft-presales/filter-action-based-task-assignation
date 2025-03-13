@@ -26,5 +26,7 @@
         <widget xsi:type="definition:Text" id="hostWidget" inputName="host"/>
         <widget xsi:type="definition:Text" id="queueNameWidget" inputName="queueName"/>
         <widget xsi:type="definition:Text" id="messageWidget" inputName="message"/>
+        <widget xsi:type="definition:Text" id="usernameWidget" inputName="username"/>
+        <widget xsi:type="definition:Text" id="passwordWidget" inputName="password"/>
     </page>
 </definition:ConnectorDefinition>
