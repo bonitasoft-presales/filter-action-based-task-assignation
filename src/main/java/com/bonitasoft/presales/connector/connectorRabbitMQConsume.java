@@ -49,18 +49,29 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     @Override
     public void executeBusinessLogic() throws ConnectorException {
         LOGGER.info("Starting RabbitMQ message consumption.");
+        Connection connection = null;
+        Channel channel = null;
         try {
             ConnectionFactory factory = createConnectionFactory();
-            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
-                declareQueue(channel);
-                consumeAndFindMessage(channel);
-            } catch (IOException | TimeoutException | ShutdownSignalException e) {
-                handleException(e, "Error during message consumption.");
-            } catch (Exception e) {
-                handleException(e, "Unexpected error during message consumption.");
-            }
+            connection = factory.newConnection();
+            channel = connection.createChannel();
+            declareQueue(channel);
+            consumeAndFindMessage(channel);
+        } catch (IOException | TimeoutException | ShutdownSignalException e) {
+            handleException(e, "Error during message consumption.");
         } catch (Exception e) {
-            handleException(e, "Error creating RabbitMQ connection factory.");
+            handleException(e, "Unexpected error during message consumption.");
+        } finally {
+            try {
+                if (channel != null && channel.isOpen()) {
+                    channel.close();
+                }
+                if (connection != null && connection.isOpen()) {
+                    connection.close();
+                }
+            } catch (IOException | TimeoutException e) {
+                LOGGER.log(Level.SEVERE, "Error closing connection or channel", e);
+            }
         }
     }
 
@@ -79,25 +90,26 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         channel.queueDeclare(getQueueName(), true, false, false, null);
         LOGGER.info("Queue declared: " + getQueueName());
     }
-
+    
     private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
-        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+        String receivedMessage = null;
+        String consumerTag = null; // Para almacenar el consumerTag
+    
+        DeliverCallback deliverCallback = (tag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             LOGGER.info(" [x] Received message: " + message);
     
             if (message.contains(getMessage())) {
                 LOGGER.info(" [!] Found message: " + message);
                 setReceivedMessage(message);
-                LOGGER.info(" [!] setReceivedMessage called with: " + message); // Log agregado
+                LOGGER.info(" [!] setReceivedMessage called with: " + message);
+    
                 try {
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    channel.basicCancel(tag); // Cancelar el consumo
+                    LOGGER.info(" [!] Consumer cancelled.");
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Error acknowledging message", e);
-                }
-                try {
-                    channel.close();
-                } catch (IOException | TimeoutException e) {
-                    LOGGER.log(Level.SEVERE, "Error closing channel", e);
+                    LOGGER.log(Level.SEVERE, "Error acknowledging or cancelling", e);
                 }
             } else {
                 try {
@@ -109,8 +121,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         };
     
         try {
-            channel.basicConsume(getQueueName(), false, deliverCallback, consumerTag -> {
-            });
+            consumerTag = channel.basicConsume(getQueueName(), false, deliverCallback, consumerTagValue -> {});
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error consuming message", e);
             throw new ConnectorException("Error consuming message", e);
