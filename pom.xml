@@ -3,7 +3,7 @@
 
     <groupId>com.bonitasoft.presales.connector</groupId>
     <artifactId>connector-rabbitmq-consume</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2.1-SNAPSHOT</version>
     <name>connector-rabbitmq-consume</name>
     <packaging>jar</packaging>
 
@@ -23,7 +23,7 @@
         <connector-definition-version>1.0.0</connector-definition-version>
         <connector-impl-id>${connector-definition-id}-impl</connector-impl-id>
         <connector-impl-version>${project.version}</connector-impl-version>
-        <connector-main-class>com.bonitasoft.presales.connector.connectorRabbitMQ</connector-main-class>
+        <connector-main-class>com.bonitasoft.presales.connector.connectorRabbitMQConsume</connector-main-class>
 
         <!-- Bonita -->
         <bonita-runtime.version>10.2.0</bonita-runtime.version>

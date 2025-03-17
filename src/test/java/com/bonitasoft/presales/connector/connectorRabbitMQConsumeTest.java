@@ -1,29 +1,23 @@
 package com.bonitasoft.presales.connector;
 
 import com.rabbitmq.client.*;
-import org.bonitasoft.engine.connector.ConnectorException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public class connectorRabbitMQTest {
+public class connectorRabbitMQConsumeTest {
 
-    private connectorRabbitMQ connector;
+    private connectorRabbitMQConsume connector;
 
     @Mock
     private ConnectionFactory connectionFactory;
@@ -37,7 +31,7 @@ public class connectorRabbitMQTest {
     @BeforeEach
     public void setUp() throws IOException, TimeoutException {
         MockitoAnnotations.openMocks(this);
-        connector = new connectorRabbitMQ();
+        connector = new connectorRabbitMQConsume();
 
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.createChannel()).thenReturn(channel);
@@ -46,9 +40,9 @@ public class connectorRabbitMQTest {
     @Test
     public void testValidateInputParameters_invalidHost() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(connectorRabbitMQ.HOST_INPUT_PARAMETER, 123);
-        parameters.put(connectorRabbitMQ.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
-        parameters.put(connectorRabbitMQ.MESSAGE_INPUT_PARAMETER, "Hello, World!");
+        parameters.put(connectorRabbitMQConsume.HOST_INPUT_PARAMETER, 123);
+        parameters.put(connectorRabbitMQConsume.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
+        parameters.put(connectorRabbitMQConsume.MESSAGE_INPUT_PARAMETER, "Hello, World!");
         connector.setInputParameters(parameters);
 
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());

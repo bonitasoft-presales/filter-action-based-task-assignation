@@ -17,9 +17,9 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.ShutdownSignalException;
 
-public class connectorRabbitMQ extends AbstractConnector implements RabbitMQConstants{
+public class connectorRabbitMQConsume extends AbstractConnector implements RabbitMQConstants{
 
-    private static final Logger LOGGER = Logger.getLogger(connectorRabbitMQ.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(connectorRabbitMQConsume.class.getName());
 
     protected final java.lang.String getHost() {
         return (java.lang.String) getInputParameter(HOST_INPUT_PARAMETER);
