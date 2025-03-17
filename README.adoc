@@ -13,9 +13,9 @@
 :short-bonita-version: 2024.3
 :doc-url: https://documentation.bonitasoft.com/bonita/{short-bonita-version}
 :java-version: 17
-= connector-rabbitmq
+= connector-rabbitmq-consume
 
-The project **connector-rabbitmq** is a Bonita Connector for **Bonita {short-bonita-version}**  **Community** version written in `java` language.
+The project **connector-rabbitmq-consume** is a Bonita Connector for **Bonita {short-bonita-version}**  **Community** version written in `java` language.
 
 _**TODO**_: A brief description of your project, what it is used for and how does life get
 awesome when someone starts to use it.
@@ -51,12 +51,12 @@ project after some code changes, state them here:
 
 [source,bash]
 ----
-git clone https://your.github.com/connector-rabbitmq.git
-cd connector-rabbitmq/
+git clone https://your.github.com/connector-rabbitmq-consume.git
+cd connector-rabbitmq-consume/
 ./mwnw package
 ----
 
-The build should produce a jar archive under the `target/` folder named `connector-rabbitmq-1.0-SNAPSHOT.jar`
+The build should produce a jar archive under the `target/` folder named `connector-rabbitmq-consume-1.0-SNAPSHOT.jar`
 
 _**TODO**_: Here again you should state what actually happens when the code above gets
 executed.
