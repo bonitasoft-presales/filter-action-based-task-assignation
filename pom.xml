@@ -3,8 +3,8 @@
 
     <groupId>com.bonitasoft.presales.connector</groupId>
     <artifactId>connector-rabbitmq</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>connector-rabbitmq</name>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>connector-rabbitmq-consume</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -32,7 +32,7 @@
         <junit-jupiter-engine.version>5.10.0</junit-jupiter-engine.version>
         <assertj-core.version>3.24.2</assertj-core.version>
         <mockito-core.version>5.6.0</mockito-core.version>
-        <logback-classic.version>1.2.13</logback-classic.version>
+        <logback-classic.version>1.5.17</logback-classic.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>

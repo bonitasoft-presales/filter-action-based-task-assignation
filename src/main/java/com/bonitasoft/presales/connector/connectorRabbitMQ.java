@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import org.bonitasoft.engine.connector.AbstractConnector;
 import org.bonitasoft.engine.connector.ConnectorException;
@@ -13,6 +14,7 @@ import org.bonitasoft.engine.connector.ConnectorValidationException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.ShutdownSignalException;
 
 public class connectorRabbitMQ extends AbstractConnector implements RabbitMQConstants{
@@ -46,44 +48,29 @@ public class connectorRabbitMQ extends AbstractConnector implements RabbitMQCons
 
     @Override
     public void executeBusinessLogic() throws ConnectorException {
-        LOGGER.info("Starting RabbitMQ message publication.");
+        LOGGER.info("Starting RabbitMQ message consumption.");
         try {
-            validateInputs();
             ConnectionFactory factory = createConnectionFactory();
-            try (Connection connection = factory.newConnection();
-                 Channel channel = connection.createChannel()) {
+            try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
                 declareQueue(channel);
-                publishMessage(channel);
-                setReceivedMessageOutput();
-
-            } catch (IOException | TimeoutException e) {
-                handleConnectionOrChannelException(e);
-            } catch (ShutdownSignalException e) {
-                handlePublishShutdownException(e);
+                consumeAndFindMessage(channel);
+            } catch (IOException | TimeoutException | ShutdownSignalException e) {
+                handleException(e, "Error during message consumption.");
             } catch (Exception e) {
-                handlePublishGeneralException(e);
+                handleException(e, "Unexpected error during message consumption.");
             }
-
-        } catch (ClassCastException e) {
-            handleClassCastException(e);
         } catch (Exception e) {
-            handleGeneralException(e);
+            handleException(e, "Error creating RabbitMQ connection factory.");
         }
-    }
-
-    private void validateInputs() throws ConnectorException {
-        if (getHost() == null || getQueueName() == null || getMessage() == null || getUsername() == null || getPassword() == null) {
-            throw new ConnectorException("Required input parameters are missing.");
-        }
-        LOGGER.info(String.format("Input parameters validated - Retrieved host: %s, queueName: %s, message: %s, username: %s, password: ********",
-        getHost(), getQueueName(), getMessage(), getUsername()));
     }
 
     private ConnectionFactory createConnectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
+        LOGGER.info(String.format("createConnectionFactory - Username: (%s) - Password: (%s) - Host: (%s)",getUsername(), getPassword(), getHost()));
         factory.setHost(getHost());
         factory.setUsername(getUsername());
         factory.setPassword(getPassword());
+        factory.setVirtualHost("/");
         LOGGER.info("ConnectionFactory created and configured.");
         return factory;
     }
@@ -93,68 +80,92 @@ public class connectorRabbitMQ extends AbstractConnector implements RabbitMQCons
         LOGGER.info("Queue declared: " + getQueueName());
     }
 
-    private void publishMessage(Channel channel) throws IOException, ConnectorException {
-        channel.basicPublish("", getQueueName(), null, getMessage().getBytes(StandardCharsets.UTF_8));
-        LOGGER.info("Message published to queue: " + getQueueName());
+    private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            LOGGER.info(" [x] Received message: " + message);
+    
+            if (message.contains(getMessage())) {
+                LOGGER.info(" [!] Found message: " + message);
+                setReceivedMessage(message);
+                LOGGER.info(" [!] setReceivedMessage called with: " + message); // Log agregado
+                try {
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Error acknowledging message", e);
+                }
+                try {
+                    channel.close();
+                } catch (IOException | TimeoutException e) {
+                    LOGGER.log(Level.SEVERE, "Error closing channel", e);
+                }
+            } else {
+                try {
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Error acknowledging message", e);
+                }
+            }
+        };
+    
+        try {
+            channel.basicConsume(getQueueName(), false, deliverCallback, consumerTag -> {
+            });
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error consuming message", e);
+            throw new ConnectorException("Error consuming message", e);
+        }
     }
 
-    private void setReceivedMessageOutput() {
-        String receivedMessage = "Message '" + getMessage() + "' sent to queue " + getQueueName() + " on host " + getHost();
-        setReceivedMessage(receivedMessage);
-        LOGGER.info("Received message output set.");
+    private void handleException(Exception e, String message) throws ConnectorException {
+        LOGGER.log(Level.SEVERE, message, e);
+        throw new ConnectorException(message, e);
     }
 
-    private void handleConnectionOrChannelException(Exception e) throws ConnectorException {
-        LOGGER.log(Level.SEVERE, "Error establishing connection or channel to RabbitMQ on host " + getHost(), e);
-        throw new ConnectorException("Error connecting to RabbitMQ", e);
-    }
 
-    private void handlePublishShutdownException(ShutdownSignalException e) throws ConnectorException {
-        LOGGER.log(Level.SEVERE, "Channel shutdown while publishing message to queue " + getQueueName() + " on host " + getHost(), e);
-        throw new ConnectorException("Error publishing message due to channel shutdown", e);
-    }
-
-    private void handlePublishGeneralException(Exception e) throws ConnectorException {
-        LOGGER.log(Level.SEVERE, "Error publishing message to queue " + getQueueName() + " on host " + getHost(), e);
-        throw new ConnectorException("Error publishing message", e);
-    }
-
-    private void handleClassCastException(ClassCastException e) throws ConnectorException {
-        LOGGER.log(Level.SEVERE, "Error casting input parameters", e);
-        throw new ConnectorException("Error casting input parameters", e);
-    }
-
-    private void handleGeneralException(Exception e) throws ConnectorException {
-        LOGGER.log(Level.SEVERE, "Unexpected error in RabbitMQ connector", e);
-        throw new ConnectorException("Unexpected error", e);
-    }
-
+    /**
+     * Validates input parameters to ensure they are not null and have the correct type.
+     * If any validation fails, a ConnectorValidationException is thrown with detailed error messages.
+     * The validated values are logged for reference.
+     * 
+     * @throws ConnectorValidationException if any of the input parameters are missing or of an invalid type.
+     */
     @Override
     public void validateInputParameters() throws ConnectorValidationException {
+        // StringBuilder to accumulate error messages
+        StringBuilder errors = new StringBuilder();
         try {
-            getHost();
-        } catch (ClassCastException cce) {
-            throw new ConnectorValidationException("host type is invalid");
+            // List of input parameters and their names
+            Object[] inputParams = {getHost(), getQueueName(), getMessage(), getUsername(), getPassword()};
+            String[] paramNames = {"host", "queueName", "message", "username", "password"};
+
+        
+            // Validate null values and types using streams
+            IntStream.range(0, inputParams.length).forEach(i -> {
+                // Check if the parameter is null
+                if (inputParams[i] == null) {
+                    errors.append(paramNames[i]).append(" is missing\n");
+                } 
+                // Check if the parameter is not a String
+                else if (!(inputParams[i] instanceof String)) {
+                    errors.append(paramNames[i]).append(" should be a String but was ").append(inputParams[i].getClass().getSimpleName()).append("\n");
+                }
+            });
+            
+            // If there are any validation errors, throw an exception with all the accumulated error messages
+            if (errors.length() > 0) {
+                throw new ConnectorValidationException(errors.toString().trim());
+            }
+    
+        } catch (ClassCastException e) {
+            // Capture ClassCastException and throw a ConnectorValidationException
+            throw new ConnectorValidationException("Invalid type encountered during validation: " + e.getMessage());
         }
-        try {
-            getQueueName();
-        } catch (ClassCastException cce) {
-            throw new ConnectorValidationException("queueName type is invalid");
-        }
-        try {
-            getMessage();
-        } catch (ClassCastException cce) {
-            throw new ConnectorValidationException("message type is invalid");
-        }
-        try {
-            getUsername();
-        } catch (ClassCastException cce) {
-            throw new ConnectorValidationException("username type is invalid");
-        }
-        try {
-            getPassword();
-        } catch (ClassCastException cce) {
-            throw new ConnectorValidationException("password type is invalid");
-        }
+
+        // Log the validated parameters for debugging purposes
+        LOGGER.info(String.format("Input parameters validated - Retrieved host: (%s), queueName: (%s), message: (%s), username: (%s), password: (%s)",
+            getHost(), getQueueName(), getMessage(), getUsername(), getPassword()));
     }
+
 }
+
