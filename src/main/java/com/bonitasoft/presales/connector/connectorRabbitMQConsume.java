@@ -11,6 +11,8 @@ import org.bonitasoft.engine.connector.AbstractConnector;
 import org.bonitasoft.engine.connector.ConnectorException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -62,6 +64,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         } catch (Exception e) {
             handleException(e, "Unexpected error during message consumption.");
         } finally {
+            LOGGER.log(Level.INFO, "Closing connection or channel...");
             try {
                 if (channel != null && channel.isOpen()) {
                     channel.close();
@@ -90,34 +93,42 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         channel.queueDeclare(getQueueName(), true, false, false, null);
         LOGGER.info("Queue declared: " + getQueueName());
     }
-    
+
     private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
-        String receivedMessage = null;
         String consumerTag = null; // Para almacenar el consumerTag
     
         DeliverCallback deliverCallback = (tag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             LOGGER.info(" [x] Received message: " + message);
-    
-            if (message.contains(getMessage())) {
+            Boolean existPersistenceId = false;
+            try {
+                existPersistenceId = checkPersistenceId(message);
+                LOGGER.info(" [!] existPersistenceId: " + existPersistenceId.toString());
+            } catch (ConnectorException e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+            LOGGER.info(" [!] check if existPersistenceId: ");
+            if (existPersistenceId) {
                 LOGGER.info(" [!] Found message: " + message);
-                setReceivedMessage(message);
-                LOGGER.info(" [!] setReceivedMessage called with: " + message);
-    
                 try {
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    LOGGER.info(" [!] Message acknowledged successfully (existPersistenceId).");
                     channel.basicCancel(tag); // Cancelar el consumo
-                    LOGGER.info(" [!] Consumer cancelled.");
+                    LOGGER.info(" [!] Consumer cancelled after finding message.");
                 } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, "Error acknowledging or cancelling", e);
                 }
             } else {
+                LOGGER.info(" [!] Message does not match search criteria. Acknowledging message.");
                 try {
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    LOGGER.info(" [!] Message acknowledged successfully. (!existPersistenceId)");
                 } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, "Error acknowledging message", e);
                 }
             }
+            setReceivedMessage(message);
+            LOGGER.info(" [!] setReceivedMessage called with: " + message);
         };
     
         try {
@@ -133,6 +144,27 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         throw new ConnectorException(message, e);
     }
 
+    private Boolean checkPersistenceId(String jsonString) throws ConnectorException {
+        Boolean result = false;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+            Long persistenceId = jsonNode.get("persistenceId").asLong();
+            Long mensaje = Long.valueOf(getMessage());
+            LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getMensaje() (" + getMessage() + ")");
+
+            if (persistenceId == mensaje) {
+                LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getMensaje() (" + getMessage() + ")");
+                result = true;
+            } 
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error checking persistenceId", e);
+            throw new ConnectorException("Error checking persistenceId", e);
+        } 
+        return result;
+        
+    }
 
     /**
      * Validates input parameters to ensure they are not null and have the correct type.
