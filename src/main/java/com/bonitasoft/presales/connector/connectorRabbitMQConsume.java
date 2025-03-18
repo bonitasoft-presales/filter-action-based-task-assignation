@@ -11,12 +11,15 @@ import org.bonitasoft.engine.connector.AbstractConnector;
 import org.bonitasoft.engine.connector.ConnectorException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.ShutdownSignalException;
 
 public class connectorRabbitMQConsume extends AbstractConnector implements RabbitMQConstants{
@@ -57,6 +60,13 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
             ConnectionFactory factory = createConnectionFactory();
             connection = factory.newConnection();
             channel = connection.createChannel();
+            boolean hayMensajes = hayMensajesEnCola(channel);
+            if (hayMensajes) {
+                LOGGER.info("La cola tiene mensajes, procesando...");
+                consumeMenssages(channel);
+            } else {
+                LOGGER.info("No hay más mensajes en la cola.");
+            }
             declareQueue(channel);
             consumeAndFindMessage(channel);
         } catch (IOException | TimeoutException | ShutdownSignalException e) {
@@ -92,6 +102,22 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     private void declareQueue(Channel channel) throws IOException, ConnectorException {
         channel.queueDeclare(getQueueName(), true, false, false, null);
         LOGGER.info("Queue declared: " + getQueueName());
+    }
+
+    private void consumeMenssages(Channel channel) throws IOException {
+        GetResponse response;
+        Integer index = 0;
+        while ((response = channel.basicGet(getQueueName(), false)) != null) {
+            String message = new String(response.getBody(), "UTF-8");
+            LOGGER.info((index++).toString()+" - Mensaje recibido: " + message);
+
+            // Procesar mensaje aquí...
+
+            // Confirmar procesamiento
+            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+
+        }
+        LOGGER.info("Todos los mensajes han sido procesados.");
     }
 
     private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
@@ -144,26 +170,48 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         throw new ConnectorException(message, e);
     }
 
+    private boolean hayMensajesEnCola(Channel channel) throws IOException {
+        AMQP.Queue.DeclareOk queueInfo = channel.queueDeclarePassive(getQueueName());
+        return queueInfo.getMessageCount() > 0;
+    }
+
     private Boolean checkPersistenceId(String jsonString) throws ConnectorException {
         Boolean result = false;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(jsonString);
+            try {
+                JsonNode jsonNode = objectMapper.readTree(jsonString);
 
-            Long persistenceId = jsonNode.get("persistenceId").asLong();
-            Long mensaje = Long.valueOf(getMessage());
-            LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getMensaje() (" + getMessage() + ")");
+                if (jsonNode.has("persistenceId")) { //Verifica que exista la propiedad.
+                    Long persistenceId = jsonNode.get("persistenceId").asLong();
+                    Long mensaje = Long.valueOf(getMessage());
+                    LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getMensaje() (" + getMessage() + ")");
 
-            if (persistenceId == mensaje) {
-                LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getMensaje() (" + getMessage() + ")");
-                result = true;
-            } 
+                    if (persistenceId.equals(mensaje)) { //Usar equals para comparar Longs
+                        LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getMensaje() (" + getMessage() + ")");
+                        result = true;
+                    }
+                } else{
+                    LOGGER.info("JSON no contiene persistenceId");
+                }
+
+            } catch (JsonParseException e) {
+                // No es JSON válido, realizar búsqueda de texto
+                LOGGER.info("Cadena no es JSON, realizando búsqueda de texto.");
+                if (jsonString.contains(getMessage())) {
+                    LOGGER.info("Cadena contiene: " + getMessage());
+                    result = true;
+                }
+            }
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error checking persistenceId", e);
             throw new ConnectorException("Error checking persistenceId", e);
-        } 
+        } catch (NumberFormatException e){
+            LOGGER.log(Level.SEVERE, "Error al convertir getMessage() a Long", e);
+            throw new ConnectorException("Error al convertir getMessage() a Long", e);
+        }
         return result;
-        
     }
 
     /**
