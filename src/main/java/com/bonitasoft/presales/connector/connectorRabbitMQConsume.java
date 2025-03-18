@@ -62,13 +62,13 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
             channel = connection.createChannel();
             boolean hayMensajes = hayMensajesEnCola(channel);
             if (hayMensajes) {
-                LOGGER.info("La cola tiene mensajes, procesando...");
+                LOGGER.info(" [!] La cola tiene mensajes, procesando...");
                 consumeMenssages(channel);
             } else {
-                LOGGER.info("No hay más mensajes en la cola.");
+                LOGGER.info(" [!] No hay más mensajes en la cola.");
             }
-            declareQueue(channel);
-            consumeAndFindMessage(channel);
+            //declareQueue(channel);
+            //consumeAndFindMessage(channel);
         } catch (IOException | TimeoutException | ShutdownSignalException e) {
             handleException(e, "Error during message consumption.");
         } catch (Exception e) {
@@ -105,6 +105,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     }
 
     private void consumeMenssages(Channel channel) throws IOException {
+        LOGGER.info(" [!] begin consumeMenssages: ");
         GetResponse response;
         Integer index = 0;
         while ((response = channel.basicGet(getQueueName(), false)) != null) {
@@ -115,9 +116,9 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
 
             // Confirmar procesamiento
             channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-
+            LOGGER.info(" [!] Message acknowledged successfully.");
         }
-        LOGGER.info("Todos los mensajes han sido procesados.");
+        LOGGER.info(" [!] Todos los mensajes han sido procesados.");
     }
 
     private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
