@@ -108,15 +108,31 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         LOGGER.info(" [!] begin consumeMenssages: ");
         GetResponse response;
         Integer index = 0;
-        while ((response = channel.basicGet(getQueueName(), false)) != null) {
+        while ((response = channel.basicGet(getQueueName(), false)) != null || index == 50) {
             String message = new String(response.getBody(), "UTF-8");
             LOGGER.info((index++).toString()+" - Mensaje recibido: " + message);
 
-            // Procesar mensaje aquí...
-
-            // Confirmar procesamiento
-            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-            LOGGER.info(" [!] Message acknowledged successfully.");
+            Boolean existPersistenceId = false;
+            try {
+                existPersistenceId = checkPersistenceId(message);
+                LOGGER.info(" [!] existPersistenceId: " + existPersistenceId.toString());
+            } catch (ConnectorException e) {
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            }
+            LOGGER.info(" [!] check if existPersistenceId: ");
+            if (existPersistenceId) {
+                LOGGER.info(" [!] Found message: " + message);
+                try {
+                    LOGGER.info(" [!]  Message does match search criteria. Acknowledging message. (existPersistenceId).");
+                    // Confirmar procesamiento
+                    channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                    LOGGER.info(" [!] Message acknowledged successfully.");
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Error acknowledging or cancelling", e);
+                }
+            } else {
+                LOGGER.info(" [!] Message does not match search criteria. Not acknowledging message. (!existPersistenceId)");
+            }
         }
         LOGGER.info(" [!] Todos los mensajes han sido procesados.");
     }
