@@ -15,7 +15,7 @@
     <input mandatory="true" name="durable" type="java.lang.Boolean" defaultValue="false"/>
     <input mandatory="true" name="exclusive" type="java.lang.Boolean" defaultValue="false"/>
     <input mandatory="true" name="autoDelete" type="java.lang.Boolean" defaultValue="false"/>
-    <input mandatory="true" name="arguments" type="java.util.Map" defaultValue="null"/>
+    <input mandatory="false" name="arguments" type="java.util.Map" defaultValue="null"/>
 
     <!-- Connector outputs -->
     <output name="receivedMessage" type="java.lang.String"/>

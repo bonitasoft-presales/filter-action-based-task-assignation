@@ -2,14 +2,11 @@ package com.bonitasoft.presales.connector;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 import org.bonitasoft.engine.connector.AbstractConnector;
 import org.bonitasoft.engine.connector.ConnectorException;
@@ -58,6 +55,19 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         EXCLUSIVE_INPUT_PARAMETER, this::validateBooleanParam,
         AUTODELETE_INPUT_PARAMETER, this::validateBooleanParam,
         ARGUMENTS_INPUT_PARAMETER, this::validateMapParam
+    );
+
+    // Map para indicar si los parámetros son opcionales
+    private final Map<String, Boolean> optionalParameters = Map.of(
+        HOST_INPUT_PARAMETER, false,
+        QUEUENAME_INPUT_PARAMETER, false,
+        PERSISTENCE_ID_INPUT_PARAMETER, false,
+        USERNAME_INPUT_PARAMETER, false,
+        PASSWORD_INPUT_PARAMETER, false,
+        DURABLE_INPUT_PARAMETER, false,
+        EXCLUSIVE_INPUT_PARAMETER, false,
+        AUTODELETE_INPUT_PARAMETER, false,
+        ARGUMENTS_INPUT_PARAMETER, true
     );
 
     protected final java.lang.String getHost() {
@@ -288,13 +298,15 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         StringBuilder errors = new StringBuilder();
 
         try {
-            // Validación dinámica de parámetros
             validationStrategies.forEach((paramName, validate) -> {
                 Object paramValue = paramGetters.get(paramName).get(); // Usar el Supplier para obtener el valor
-                validate.validate(paramValue, paramName, errors); // Validar el parámetro
+                if (optionalParameters.get(paramName)) {
+                    validateOptionalParam(paramValue, paramName, errors);
+                } else {
+                    validate.validate(paramValue, paramName, errors);
+                }
             });
 
-            // Si hay errores, lanzar una excepción
             if (errors.length() > 0) {
                 throw new ConnectorValidationException(errors.toString().trim());
             }
@@ -304,6 +316,12 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         }
 
         logValidatedParameters();
+    }
+
+    private void validateOptionalParam(Object param, String paramName, StringBuilder errors) {
+        if (param != null) {
+            validationStrategies.get(paramName).validate(param, paramName, errors);
+        }
     }
 
     private void logValidatedParameters() {
@@ -334,6 +352,12 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         }
     }
 
+    private void validateOptionalStringParam(Object param, String paramName, StringBuilder errors) {
+        if (param != null && !(param instanceof String)) {
+            errors.append(paramName).append(" should be a String or null but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
+    }
+
     private void validateBooleanParam(Object param, String paramName, StringBuilder errors) {
         if (param == null) {
             errors.append(paramName).append(" is missing\n");
@@ -342,11 +366,23 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         }
     }
 
+    private void validateOptionalBooleanParam(Object param, String paramName, StringBuilder errors) {
+        if (param != null && !(param instanceof Boolean)) {
+            errors.append(paramName).append(" should be a Boolean or null but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
+    }
+
     private void validateMapParam(Object param, String paramName, StringBuilder errors) {
         if (param == null) {
             errors.append(paramName).append(" is missing\n");
         } else if (!(param instanceof Map)) {
             errors.append(paramName).append(" should be a Map<String, Object> but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
+    }
+
+    private void validateOptionalMapParam(Object param, String paramName, StringBuilder errors) {
+        if (param != null && !(param instanceof Map)) {
+            errors.append(paramName).append(" should be a Map<String, Object> or null but was ").append(param.getClass().getSimpleName()).append("\n");
         }
     }
 
