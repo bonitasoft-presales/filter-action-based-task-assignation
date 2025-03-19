@@ -42,7 +42,7 @@ public class connectorRabbitMQConsumeTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(connectorRabbitMQConsume.HOST_INPUT_PARAMETER, 123);
         parameters.put(connectorRabbitMQConsume.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
-        parameters.put(connectorRabbitMQConsume.MESSAGE_INPUT_PARAMETER, "Hello, World!");
+        parameters.put(connectorRabbitMQConsume.PERSISTENCE_ID_INPUT_PARAMETER, "Hello, World!");
         connector.setInputParameters(parameters);
 
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
@@ -53,7 +53,7 @@ public class connectorRabbitMQConsumeTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
         parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, 456); 
-        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, "Hello, World!");
+        parameters.put(RabbitMQConstants.PERSISTENCE_ID_INPUT_PARAMETER, "Hello, World!");
         connector.setInputParameters(parameters);
 
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
@@ -64,7 +64,7 @@ public class connectorRabbitMQConsumeTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
         parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
-        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, true); 
+        parameters.put(RabbitMQConstants.PERSISTENCE_ID_INPUT_PARAMETER, true); 
         connector.setInputParameters(parameters);
 
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
@@ -74,7 +74,7 @@ public class connectorRabbitMQConsumeTest {
     public void testValidateInputParameters_missingHost() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, "BonitaQueue");
-        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, "Test Message");
+        parameters.put(RabbitMQConstants.PERSISTENCE_ID_INPUT_PARAMETER, "Test Message");
         connector.setInputParameters(parameters);
     
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
@@ -84,7 +84,7 @@ public class connectorRabbitMQConsumeTest {
     public void testValidateInputParameters_missingQueueName() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, "localhost");
-        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, "Test Message");
+        parameters.put(RabbitMQConstants.PERSISTENCE_ID_INPUT_PARAMETER, "Test Message");
         connector.setInputParameters(parameters);
     
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());
@@ -105,7 +105,7 @@ public class connectorRabbitMQConsumeTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(RabbitMQConstants.HOST_INPUT_PARAMETER, null);
         parameters.put(RabbitMQConstants.QUEUENAME_INPUT_PARAMETER, null);
-        parameters.put(RabbitMQConstants.MESSAGE_INPUT_PARAMETER, null);
+        parameters.put(RabbitMQConstants.PERSISTENCE_ID_INPUT_PARAMETER, null);
         connector.setInputParameters(parameters);
     
         assertThrows(ConnectorValidationException.class, () -> connector.validateInputParameters());

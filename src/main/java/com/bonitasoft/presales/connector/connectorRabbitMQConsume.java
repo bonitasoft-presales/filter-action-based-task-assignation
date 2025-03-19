@@ -1,8 +1,12 @@
 package com.bonitasoft.presales.connector;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -18,13 +22,43 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.ShutdownSignalException;
 
 public class connectorRabbitMQConsume extends AbstractConnector implements RabbitMQConstants{
 
     private static final Logger LOGGER = Logger.getLogger(connectorRabbitMQConsume.class.getName());
+
+    @FunctionalInterface
+    interface ValidationStrategy {
+        void validate(Object paramValue, String paramName, StringBuilder errors);
+    }
+
+    // Map para los getters de parámetros usando Supplier
+    private final Map<String, Supplier<Object>> paramGetters = Map.of(
+        HOST_INPUT_PARAMETER, this::getHost,
+        QUEUENAME_INPUT_PARAMETER, this::getQueueName,
+        PERSISTENCE_ID_INPUT_PARAMETER, this::getPersistenceId,
+        USERNAME_INPUT_PARAMETER, this::getUsername,
+        PASSWORD_INPUT_PARAMETER, this::getPassword,
+        DURABLE_INPUT_PARAMETER, this::getDurable,
+        EXCLUSIVE_INPUT_PARAMETER, this::getExclusive,
+        AUTODELETE_INPUT_PARAMETER, this::getAutoDelete,
+        ARGUMENTS_INPUT_PARAMETER, this::getArguments
+    );
+
+    // Map para las estrategias de validación
+    private final Map<String, ValidationStrategy> validationStrategies = Map.of(
+        HOST_INPUT_PARAMETER, this::validateStringParam,
+        QUEUENAME_INPUT_PARAMETER, this::validateStringParam,
+        PERSISTENCE_ID_INPUT_PARAMETER, this::validateStringParam,
+        USERNAME_INPUT_PARAMETER, this::validateStringParam,
+        PASSWORD_INPUT_PARAMETER, this::validateStringParam,
+        DURABLE_INPUT_PARAMETER, this::validateBooleanParam,
+        EXCLUSIVE_INPUT_PARAMETER, this::validateBooleanParam,
+        AUTODELETE_INPUT_PARAMETER, this::validateBooleanParam,
+        ARGUMENTS_INPUT_PARAMETER, this::validateMapParam
+    );
 
     protected final java.lang.String getHost() {
         return (java.lang.String) getInputParameter(HOST_INPUT_PARAMETER);
@@ -34,8 +68,8 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         return (java.lang.String) getInputParameter(QUEUENAME_INPUT_PARAMETER);
     }
 
-    protected final java.lang.String getMessage() {
-        return (java.lang.String) getInputParameter(MESSAGE_INPUT_PARAMETER);
+    protected final java.lang.String getPersistenceId() {
+        return (java.lang.String) getInputParameter(PERSISTENCE_ID_INPUT_PARAMETER);
     }
     
     protected final java.lang.String getUsername() {
@@ -46,9 +80,27 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         return (java.lang.String) getInputParameter(PASSWORD_INPUT_PARAMETER);
     }
 
+    protected final java.lang.Boolean getDurable() {
+        return (java.lang.Boolean) getInputParameter(DURABLE_INPUT_PARAMETER);
+    }
+    
+    protected final java.lang.Boolean getExclusive() {
+        return (java.lang.Boolean) getInputParameter(EXCLUSIVE_INPUT_PARAMETER);
+    }
+    
+    protected final java.lang.Boolean getAutoDelete() {
+        return (java.lang.Boolean) getInputParameter(AUTODELETE_INPUT_PARAMETER);
+    }
+    
+    protected final java.util.Map<java.lang.String, java.lang.Object> getArguments() {
+        return (java.util.Map<java.lang.String, java.lang.Object>) getInputParameter(ARGUMENTS_INPUT_PARAMETER);
+    }
+
     protected final void setReceivedMessage(java.lang.String receivedMessage) {
         setOutputParameter(RECEIVEDMESSAGE_OUTPUT_PARAMETER, receivedMessage);
     }
+
+    
 
 
     @Override
@@ -67,8 +119,6 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
             } else {
                 LOGGER.info(" [!] No hay más mensajes en la cola.");
             }
-            //declareQueue(channel);
-            //consumeAndFindMessage(channel);
         } catch (IOException | TimeoutException | ShutdownSignalException e) {
             handleException(e, "Error during message consumption.");
         } catch (Exception e) {
@@ -90,7 +140,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
 
     private ConnectionFactory createConnectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
-        LOGGER.info(String.format("createConnectionFactory - Username: (%s) - Password: (%s) - Host: (%s)",getUsername(), getPassword(), getHost()));
+        LOGGER.info(String.format("createConnectionFactory - Username: (%s) - Password: (*****) - Host: (%s)",getUsername(), getPassword(), getHost()));
         factory.setHost(getHost());
         factory.setUsername(getUsername());
         factory.setPassword(getPassword());
@@ -98,17 +148,18 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         LOGGER.info("ConnectionFactory created and configured.");
         return factory;
     }
-
+/* 
     private void declareQueue(Channel channel) throws IOException, ConnectorException {
         channel.queueDeclare(getQueueName(), true, false, false, null);
         LOGGER.info("Queue declared: " + getQueueName());
-    }
+    }*/
 
     private void consumeMenssages(Channel channel) throws IOException {
         LOGGER.info(" [!] begin consumeMenssages: ");
         GetResponse response;
         Integer index = 0;
-        while ((response = channel.basicGet(getQueueName(), false)) != null || index == 50) {
+        setReceivedMessage(null);
+        while ((response = channel.basicGet(getQueueName(), false)) != null) {
             String message = new String(response.getBody(), "UTF-8");
             LOGGER.info((index++).toString()+" - Mensaje recibido: " + message);
 
@@ -124,6 +175,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
                 LOGGER.info(" [!] Found message: " + message);
                 try {
                     LOGGER.info(" [!]  Message does match search criteria. Acknowledging message. (existPersistenceId).");
+                    setReceivedMessage(message);
                     // Confirmar procesamiento
                     channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     LOGGER.info(" [!] Message acknowledged successfully.");
@@ -136,7 +188,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         }
         LOGGER.info(" [!] Todos los mensajes han sido procesados.");
     }
-
+/*
     private void consumeAndFindMessage(Channel channel) throws IOException, ConnectorException {
         String consumerTag = null; // Para almacenar el consumerTag
     
@@ -181,7 +233,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
             throw new ConnectorException("Error consuming message", e);
         }
     }
-
+*/
     private void handleException(Exception e, String message) throws ConnectorException {
         LOGGER.log(Level.SEVERE, message, e);
         throw new ConnectorException(message, e);
@@ -201,11 +253,11 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
 
                 if (jsonNode.has("persistenceId")) { //Verifica que exista la propiedad.
                     Long persistenceId = jsonNode.get("persistenceId").asLong();
-                    Long mensaje = Long.valueOf(getMessage());
-                    LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getMensaje() (" + getMessage() + ")");
+                    Long mensaje = Long.valueOf(getPersistenceId());
+                    LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getPersistenceId() (" + getPersistenceId() + ")");
 
                     if (persistenceId.equals(mensaje)) { //Usar equals para comparar Longs
-                        LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getMensaje() (" + getMessage() + ")");
+                        LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getPersistenceId() (" + getPersistenceId() + ")");
                         result = true;
                     }
                 } else{
@@ -215,8 +267,8 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
             } catch (JsonParseException e) {
                 // No es JSON válido, realizar búsqueda de texto
                 LOGGER.info("Cadena no es JSON, realizando búsqueda de texto.");
-                if (jsonString.contains(getMessage())) {
-                    LOGGER.info("Cadena contiene: " + getMessage());
+                if (jsonString.contains(getPersistenceId())) {
+                    LOGGER.info("Cadena contiene: " + getPersistenceId());
                     result = true;
                 }
             }
@@ -231,48 +283,71 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         return result;
     }
 
-    /**
-     * Validates input parameters to ensure they are not null and have the correct type.
-     * If any validation fails, a ConnectorValidationException is thrown with detailed error messages.
-     * The validated values are logged for reference.
-     * 
-     * @throws ConnectorValidationException if any of the input parameters are missing or of an invalid type.
-     */
     @Override
     public void validateInputParameters() throws ConnectorValidationException {
-        // StringBuilder to accumulate error messages
         StringBuilder errors = new StringBuilder();
-        try {
-            // List of input parameters and their names
-            Object[] inputParams = {getHost(), getQueueName(), getMessage(), getUsername(), getPassword()};
-            String[] paramNames = {"host", "queueName", "message", "username", "password"};
 
-        
-            // Validate null values and types using streams
-            IntStream.range(0, inputParams.length).forEach(i -> {
-                // Check if the parameter is null
-                if (inputParams[i] == null) {
-                    errors.append(paramNames[i]).append(" is missing\n");
-                } 
-                // Check if the parameter is not a String
-                else if (!(inputParams[i] instanceof String)) {
-                    errors.append(paramNames[i]).append(" should be a String but was ").append(inputParams[i].getClass().getSimpleName()).append("\n");
-                }
+        try {
+            // Validación dinámica de parámetros
+            validationStrategies.forEach((paramName, validate) -> {
+                Object paramValue = paramGetters.get(paramName).get(); // Usar el Supplier para obtener el valor
+                validate.validate(paramValue, paramName, errors); // Validar el parámetro
             });
-            
-            // If there are any validation errors, throw an exception with all the accumulated error messages
+
+            // Si hay errores, lanzar una excepción
             if (errors.length() > 0) {
                 throw new ConnectorValidationException(errors.toString().trim());
             }
-    
+
         } catch (ClassCastException e) {
-            // Capture ClassCastException and throw a ConnectorValidationException
             throw new ConnectorValidationException("Invalid type encountered during validation: " + e.getMessage());
         }
 
-        // Log the validated parameters for debugging purposes
-        LOGGER.info(String.format("Input parameters validated - Retrieved host: (%s), queueName: (%s), message: (%s), username: (%s), password: (%s)",
-            getHost(), getQueueName(), getMessage(), getUsername(), getPassword()));
+        logValidatedParameters();
+    }
+
+    private void logValidatedParameters() {
+        Map<String, Object> params = new HashMap<>();
+        paramGetters.forEach((paramName, getter) -> {
+            params.put(paramName, getter.get()); // Obtener y loguear cada parámetro
+        });
+
+        StringBuilder logMessage = new StringBuilder("Input parameters validated - ");
+        params.forEach((key, value) -> 
+            logMessage.append(String.format("%s: (%s), ", key, value))
+        );
+
+        if (logMessage.length() > 0) {
+            logMessage.setLength(logMessage.length() - 2); // Eliminar la última coma
+        }
+
+        LOGGER.info(logMessage.toString());
+    }
+
+
+
+    private void validateStringParam(Object param, String paramName, StringBuilder errors) {
+        if (param == null) {
+            errors.append(paramName).append(" is missing\n");
+        } else if (!(param instanceof String)) {
+            errors.append(paramName).append(" should be a String but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
+    }
+
+    private void validateBooleanParam(Object param, String paramName, StringBuilder errors) {
+        if (param == null) {
+            errors.append(paramName).append(" is missing\n");
+        } else if (!(param instanceof Boolean)) {
+            errors.append(paramName).append(" should be a Boolean but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
+    }
+
+    private void validateMapParam(Object param, String paramName, StringBuilder errors) {
+        if (param == null) {
+            errors.append(paramName).append(" is missing\n");
+        } else if (!(param instanceof Map)) {
+            errors.append(paramName).append(" should be a Map<String, Object> but was ").append(param.getClass().getSimpleName()).append("\n");
+        }
     }
 
 }
