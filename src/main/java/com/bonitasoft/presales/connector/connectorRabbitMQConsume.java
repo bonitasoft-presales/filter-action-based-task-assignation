@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,24 +38,11 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, this::getQueueName,
         PERSISTENCE_ID_INPUT_PARAMETER, this::getPersistenceId,
         USERNAME_INPUT_PARAMETER, this::getUsername,
-        PASSWORD_INPUT_PARAMETER, this::getPassword,
+        PASSWORD_INPUT_PARAMETER, this::getPassword/*,
         DURABLE_INPUT_PARAMETER, this::getDurable,
         EXCLUSIVE_INPUT_PARAMETER, this::getExclusive,
         AUTODELETE_INPUT_PARAMETER, this::getAutoDelete,
-        ARGUMENTS_INPUT_PARAMETER, this::getArguments
-    );
-
-    // Map para las estrategias de validación
-    private final Map<String, ValidationStrategy> validationStrategies = Map.of(
-        HOST_INPUT_PARAMETER, this::validateStringParam,
-        QUEUENAME_INPUT_PARAMETER, this::validateStringParam,
-        PERSISTENCE_ID_INPUT_PARAMETER, this::validateStringParam,
-        USERNAME_INPUT_PARAMETER, this::validateStringParam,
-        PASSWORD_INPUT_PARAMETER, this::validateStringParam,
-        DURABLE_INPUT_PARAMETER, this::validateBooleanParam,
-        EXCLUSIVE_INPUT_PARAMETER, this::validateBooleanParam,
-        AUTODELETE_INPUT_PARAMETER, this::validateBooleanParam,
-        ARGUMENTS_INPUT_PARAMETER, this::validateMapParam
+        ARGUMENTS_INPUT_PARAMETER, this::getArguments*/
     );
 
     // Map para indicar si los parámetros son opcionales
@@ -63,12 +51,58 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, false,
         PERSISTENCE_ID_INPUT_PARAMETER, false,
         USERNAME_INPUT_PARAMETER, false,
-        PASSWORD_INPUT_PARAMETER, false,
+        PASSWORD_INPUT_PARAMETER, false/*,
         DURABLE_INPUT_PARAMETER, false,
         EXCLUSIVE_INPUT_PARAMETER, false,
         AUTODELETE_INPUT_PARAMETER, false,
-        ARGUMENTS_INPUT_PARAMETER, true
+        ARGUMENTS_INPUT_PARAMETER, true*/
     );
+
+    // Map para las estrategias de validación (se construye dinámicamente)
+    private final Map<String, ValidationStrategy> validationStrategies;
+
+    // Map para obtener las validaciones opcionales y obligatorias
+    private final Map<String, BiFunction<connectorRabbitMQConsume, String, ValidationStrategy>> validationStrategiesMap = Map.of(
+        HOST_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
+        QUEUENAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
+        PERSISTENCE_ID_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
+        USERNAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
+        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam/*,
+        DURABLE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
+        EXCLUSIVE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
+        AUTODELETE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
+        ARGUMENTS_INPUT_PARAMETER, (instance, paramName) -> instance::validateMapParam*/
+    );
+
+    private final Map<String, BiFunction<connectorRabbitMQConsume, String, ValidationStrategy>> optionalValidationStrategiesMap = Map.of(
+        HOST_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
+        QUEUENAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
+        PERSISTENCE_ID_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
+        USERNAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
+        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam/*,
+        DURABLE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
+        EXCLUSIVE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
+        AUTODELETE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
+        ARGUMENTS_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalMapParam*/
+    );
+
+    public connectorRabbitMQConsume() {
+        validationStrategies = buildValidationStrategies();
+    }
+
+    private Map<String, ValidationStrategy> buildValidationStrategies() {
+        Map<String, ValidationStrategy> strategies = new HashMap<>();
+
+        optionalParameters.forEach((paramName, isOptional) -> {
+            if (isOptional) {
+                strategies.put(paramName, optionalValidationStrategiesMap.getOrDefault(paramName, (instance, name) -> instance::validateStringParam).apply(this, paramName));
+            } else {
+                strategies.put(paramName, validationStrategiesMap.getOrDefault(paramName, (instance, name) -> instance::validateStringParam).apply(this, paramName));
+            }
+        });
+
+        return strategies;
+    }
 
     protected final java.lang.String getHost() {
         return (java.lang.String) getInputParameter(HOST_INPUT_PARAMETER);
@@ -89,7 +123,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     protected final java.lang.String getPassword() {
         return (java.lang.String) getInputParameter(PASSWORD_INPUT_PARAMETER);
     }
-
+/*
     protected final java.lang.Boolean getDurable() {
         return (java.lang.Boolean) getInputParameter(DURABLE_INPUT_PARAMETER);
     }
@@ -104,7 +138,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     
     protected final java.util.Map<java.lang.String, java.lang.Object> getArguments() {
         return (java.util.Map<java.lang.String, java.lang.Object>) getInputParameter(ARGUMENTS_INPUT_PARAMETER);
-    }
+    }*/
 
     protected final void setReceivedMessage(java.lang.String receivedMessage) {
         setOutputParameter(RECEIVEDMESSAGE_OUTPUT_PARAMETER, receivedMessage);

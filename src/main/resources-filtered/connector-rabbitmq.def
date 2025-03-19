@@ -11,11 +11,11 @@
     <input mandatory="true" name="persistenceId" type="java.lang.String" defaultValue=""/>
 	<input mandatory="true" name="username" type="java.lang.String"/>
 	<input mandatory="true" name="password" type="java.lang.String"/>
-
+<!--
     <input mandatory="true" name="durable" type="java.lang.Boolean" defaultValue="false"/>
     <input mandatory="true" name="exclusive" type="java.lang.Boolean" defaultValue="false"/>
     <input mandatory="true" name="autoDelete" type="java.lang.Boolean" defaultValue="false"/>
-    <input mandatory="false" name="arguments" type="java.util.Map" defaultValue="null"/>
+    <input mandatory="false" name="arguments" type="java.util.Map" defaultValue="null"/>-->
 
     <!-- Connector outputs -->
     <output name="receivedMessage" type="java.lang.String"/>
@@ -33,12 +33,13 @@
         <widget xsi:type="definition:Text" id="usernameWidget" inputName="username"/>
         <widget xsi:type="definition:Password" id="passwordWidget" inputName="password"/>
     </page>
+    <!--
     <page id="queueDeclarePage">
         <widget xsi:type="definition:Text" id="durableWidget" inputName="durable"/>
         <widget xsi:type="definition:Text" id="exclusiveWidget" inputName="exclusive"/>
         <widget xsi:type="definition:Text" id="autoDeleteWidget" inputName="autoDelete"/>
         <widget xsi:type="definition:Text" id="argumentsWidget" inputName="arguments"/>
-    </page>
+    </page>-->
     <page id="searchPage">
         <widget xsi:type="definition:Text" id="persistenceIdWidget" inputName="persistenceId"/>
     </page>
