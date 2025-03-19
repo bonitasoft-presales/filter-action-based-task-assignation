@@ -21,7 +21,10 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.Method;
+import com.rabbitmq.client.RpcClient.Response;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.rabbitmq.client.AMQP.BasicProperties;
 
 public class connectorRabbitMQConsume extends AbstractConnector implements RabbitMQConstants{
 
@@ -108,11 +111,13 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         return (java.lang.String) getInputParameter(PASSWORD_INPUT_PARAMETER);
     }
 
-    protected final void setReceivedMessage(java.lang.String receivedMessage) {
-        setOutputParameter(RECEIVEDMESSAGE_OUTPUT_PARAMETER, receivedMessage);
+    protected final void setBody(java.lang.String body) {
+        setOutputParameter(BODY_OUTPUT_PARAMETER, body);
     }
 
-    
+    protected final void setHeaders(java.util.Map headers) {
+        setOutputParameter(HEADERS_OUTPUT_PARAMETER, headers);
+    }
 
 
     @Override
@@ -120,6 +125,8 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         LOGGER.info("Starting RabbitMQ message consumption.");
         Connection connection = null;
         Channel channel = null;
+        setBody(null);
+        setHeaders(null);
         try {
             ConnectionFactory factory = createConnectionFactory();
             connection = factory.newConnection();
@@ -170,29 +177,32 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         LOGGER.info(" [!] begin consumeMenssages: ");
         GetResponse response;
         Integer index = 0;
-        setReceivedMessage(null);
         while ((response = channel.basicGet(getQueueName(), false)) != null) {
-            String message = new String(response.getBody(), "UTF-8");
-            LOGGER.info((index++).toString()+" - Mensaje recibido: " + message);
+            BasicProperties basicProperties = response.getProps();
+            Map<String, Object> headers = basicProperties.getHeaders();
+            String body = new String(response.getBody(), "UTF-8");
+
+            LOGGER.info((index++).toString()+" - Mensaje recibido: " + body);
 
             Boolean existPersistenceId = false;
             try {
-                existPersistenceId = checkPersistenceId(message);
+                existPersistenceId = validateMessage(body, headers);
                 LOGGER.info(" [!] existPersistenceId: " + existPersistenceId.toString());
             } catch (ConnectorException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
-            LOGGER.info(" [!] check if existPersistenceId: ");
+            LOGGER.info(" [!] check if existPersistenceId ");
             if (existPersistenceId) {
-                LOGGER.info(" [!] Found message: " + message);
+                LOGGER.info(" [!] Found message: " + body);
                 try {
                     LOGGER.info(" [!]  Message does match search criteria. Acknowledging message. (existPersistenceId).");
-                    setReceivedMessage(message);
+                    setBody(body);
+                    setHeaders(headers);
                     // Confirmar procesamiento
                     channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     LOGGER.info(" [!] Message acknowledged successfully.");
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Error acknowledging or cancelling", e);
+                    LOGGER.severe("Error acknowledging or cancelling" + e);
                 }
             } else {
                 LOGGER.info(" [!] Message does not match search criteria. Not acknowledging message. (!existPersistenceId)");
@@ -252,64 +262,127 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     }
 
     private boolean hayMensajesEnCola(Channel channel) throws IOException {
+        LOGGER.log(Level.INFO, "[!] hayMensajesEnCola");
         try {
             AMQP.Queue.DeclareOk queueInfo = channel.queueDeclarePassive(getQueueName());
             return queueInfo.getMessageCount() > 0;
-        } catch (ShutdownSignalException e) {
-            if (e.getReason() instanceof AMQP.Channel.Close) {
-                AMQP.Channel.Close close = (AMQP.Channel.Close) e.getReason();
-                if (close.getReplyCode() == 404) {
-                    // La cola no existe (NOT_FOUND)
-                    LOGGER.log(Level.WARNING, "La cola {} no existe.", getQueueName());
-                    return false; 
-                } else {
-                    LOGGER.log(Level.SEVERE, "[ERROR] Exception ShutdownSignalException not handled. - {}", e.getMessage());
-                    throw e;
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "[ERROR] IOException - {0}", e.getMessage());
+    
+            Throwable cause = e.getCause();  // Obtener la causa raíz
+            if (cause instanceof ShutdownSignalException shutdownSignalException) {
+                LOGGER.log(Level.INFO, "[ERROR] ShutdownSignalException: {0}", shutdownSignalException.getMessage());
+    
+                if (shutdownSignalException.getReason() instanceof AMQP.Channel.Close close) {
+                    if (close.getReplyCode() == 404) {
+                        // La cola no existe (NOT_FOUND)
+                        LOGGER.log(Level.INFO, "La cola {0} no existe.", getQueueName());
+                        return false;
+                    }
                 }
-            } else {
-                LOGGER.log(Level.SEVERE, "[ERROR] It is not an AMQP.Channel.Close - {}", e.getMessage());
-                throw e;
             }
+            throw e;  // Relanzar IOException si no es un error manejable
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[ERROR] Unexpected Exception - {0}", e.getMessage());
+            return false;
         }
     }
+    
+    
 
-    private Boolean checkPersistenceId(String jsonString) throws ConnectorException {
+    private Boolean validateMessage(String body, Map<String, Object> headers) throws ConnectorException {
+        Boolean checkPersistenceIsInBody = checkPersistenceIsInBody(body);
+        Boolean checkPersistenceIsInHeaders = checkPersistenceIsInHeaders(headers);
+        Boolean checkIfItIsResponseTypeInHeaders = checkIfItIsResponseTypeInHeaders(headers);
+        LOGGER.log(Level.INFO, "validateMessage: checkPersistenceIsInBody: {} - checkPersistenceIsInHeaders: {} - checkIfItIsResponseTypeInHeaders: {}",  new Object[] {checkPersistenceIsInBody, checkPersistenceIsInHeaders, checkIfItIsResponseTypeInHeaders});
+        return (checkPersistenceIsInBody || checkPersistenceIsInHeaders(headers)) && checkIfItIsResponseTypeInHeaders(headers);
+    }
+    
+    private Boolean checkPersistenceIsInBody(String body) throws ConnectorException {
         Boolean result = false;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             try {
-                JsonNode jsonNode = objectMapper.readTree(jsonString);
-
+                JsonNode jsonNode = objectMapper.readTree(body);
                 if (jsonNode.has("persistenceId")) { //Verifica que exista la propiedad.
                     Long persistenceId = jsonNode.get("persistenceId").asLong();
                     Long mensaje = Long.valueOf(getPersistenceId());
                     LOGGER.info("El valor de persistenceId (" + persistenceId.toString() + ") - getPersistenceId() (" + getPersistenceId() + ")");
-
-                    if (persistenceId.equals(mensaje)) { //Usar equals para comparar Longs
-                        LOGGER.info("El valor de persistenceId (" + persistenceId + ") es igual a getPersistenceId() (" + getPersistenceId() + ")");
-                        result = true;
-                    }
+                    result = persistenceId.equals(mensaje);
                 } else{
                     LOGGER.info("JSON no contiene persistenceId");
                 }
-
             } catch (JsonParseException e) {
                 // No es JSON válido, realizar búsqueda de texto
                 LOGGER.info("Cadena no es JSON, realizando búsqueda de texto.");
-                if (jsonString.contains(getPersistenceId())) {
+                if (body.contains(getPersistenceId())) {
                     LOGGER.info("Cadena contiene: " + getPersistenceId());
                     result = true;
                 }
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error checking persistenceId", e);
-            throw new ConnectorException("Error checking persistenceId", e);
+            LOGGER.log(Level.SEVERE, "Error checking persistenceId in body", e);
+            throw new ConnectorException("Error checking persistenceId in body", e);
         } catch (NumberFormatException e){
             LOGGER.log(Level.SEVERE, "Error al convertir getMessage() a Long", e);
             throw new ConnectorException("Error al convertir getMessage() a Long", e);
         }
         return result;
+    }
+    
+    private Boolean checkPersistenceIsInHeaders(Map<String, Object> headers)  throws ConnectorException  {
+        try {
+            if (headers != null) {
+                if (headers.containsKey("persistenceId")) {
+                    Object persistenceIdValue = headers.get("persistenceId");
+                    if (persistenceIdValue != null) {
+                            String persistenceId = persistenceIdValue.toString();
+                            LOGGER.log(Level.INFO, "persistenceId from Headers: {} - getPersistenceId(): {}",  new Object[] {persistenceId, getPersistenceId()});
+                            return persistenceId.equals(getPersistenceId());
+                    } else {
+                        LOGGER.info("persistenceId value in Headers is null.");
+                        return false;
+                    }
+                } else {
+                    LOGGER.info("Map does not contain persistenceId.");
+                    return false;
+                }
+            } else {
+                LOGGER.info("Does not contain the headers map");
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error checking persistenceId in headers", e);
+            throw new ConnectorException("Error checking persistenceId in headers", e);
+        }
+    }
+
+    private Boolean checkIfItIsResponseTypeInHeaders(Map<String, Object> headers)  throws ConnectorException  {
+        try {
+            if (headers != null) {
+                if (headers.containsKey("type")) {
+                    Object type = headers.get("type");
+                    if (type != null) {
+                            String typeStr = type.toString();
+                            LOGGER.log(Level.INFO, "typeStr from Headers: {} - TYPE_RESPONSE(): {}",  new Object[] {typeStr.toUpperCase(), TYPE_RESPONSE.toUpperCase()});
+                            return (typeStr.toUpperCase()).equals(TYPE_RESPONSE.toUpperCase());
+                    } else {
+                        LOGGER.info("type value in Headers is null.");
+                        return false;
+                    }
+                } else {
+                    LOGGER.info("Map does not contain type.");
+                    return false;
+                }
+            } else {
+                LOGGER.info("Does not contain the headers map");
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error checking type in headers", e);
+            throw new ConnectorException("Error checking type in headers", e);
+        }
     }
 
     @Override

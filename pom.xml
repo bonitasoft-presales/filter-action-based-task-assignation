@@ -3,7 +3,7 @@
 
     <groupId>com.bonitasoft.presales.connector</groupId>
     <artifactId>connector-rabbitmq-consume</artifactId>
-    <version>0.0.2.9-SNAPSHOT</version>
+    <version>0.0.2.10.0-SNAPSHOT</version>
     <name>connector-rabbitmq-consume</name>
     <packaging>jar</packaging>
 

@@ -7,5 +7,8 @@ public interface RabbitMQConstants {
     String PERSISTENCE_ID_INPUT_PARAMETER = "persistenceId";
     String USERNAME_INPUT_PARAMETER = "username";
     String PASSWORD_INPUT_PARAMETER = "password";
-    String RECEIVEDMESSAGE_OUTPUT_PARAMETER = "receivedMessage";
+    String BODY_OUTPUT_PARAMETER = "body";
+    String HEADERS_OUTPUT_PARAMETER = "headers";
+
+    String TYPE_RESPONSE = "response";
 }
