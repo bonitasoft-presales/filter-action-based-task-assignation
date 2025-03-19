@@ -8,8 +8,4 @@ public interface RabbitMQConstants {
     String USERNAME_INPUT_PARAMETER = "username";
     String PASSWORD_INPUT_PARAMETER = "password";
     String RECEIVEDMESSAGE_OUTPUT_PARAMETER = "receivedMessage";
-    /*String DURABLE_INPUT_PARAMETER = "durable";
-    String EXCLUSIVE_INPUT_PARAMETER = "exclusive";
-    String AUTODELETE_INPUT_PARAMETER = "autoDelete";
-    String ARGUMENTS_INPUT_PARAMETER = "arguments";*/
 }

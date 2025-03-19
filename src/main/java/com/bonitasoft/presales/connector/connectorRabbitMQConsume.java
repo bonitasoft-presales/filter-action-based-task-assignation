@@ -38,11 +38,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, this::getQueueName,
         PERSISTENCE_ID_INPUT_PARAMETER, this::getPersistenceId,
         USERNAME_INPUT_PARAMETER, this::getUsername,
-        PASSWORD_INPUT_PARAMETER, this::getPassword/*,
-        DURABLE_INPUT_PARAMETER, this::getDurable,
-        EXCLUSIVE_INPUT_PARAMETER, this::getExclusive,
-        AUTODELETE_INPUT_PARAMETER, this::getAutoDelete,
-        ARGUMENTS_INPUT_PARAMETER, this::getArguments*/
+        PASSWORD_INPUT_PARAMETER, this::getPassword
     );
 
     // Map para indicar si los parámetros son opcionales
@@ -51,11 +47,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, false,
         PERSISTENCE_ID_INPUT_PARAMETER, false,
         USERNAME_INPUT_PARAMETER, false,
-        PASSWORD_INPUT_PARAMETER, false/*,
-        DURABLE_INPUT_PARAMETER, false,
-        EXCLUSIVE_INPUT_PARAMETER, false,
-        AUTODELETE_INPUT_PARAMETER, false,
-        ARGUMENTS_INPUT_PARAMETER, true*/
+        PASSWORD_INPUT_PARAMETER, false
     );
 
     // Map para las estrategias de validación (se construye dinámicamente)
@@ -67,11 +59,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
         PERSISTENCE_ID_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
         USERNAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam,
-        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam/*,
-        DURABLE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
-        EXCLUSIVE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
-        AUTODELETE_INPUT_PARAMETER, (instance, paramName) -> instance::validateBooleanParam,
-        ARGUMENTS_INPUT_PARAMETER, (instance, paramName) -> instance::validateMapParam*/
+        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateStringParam
     );
 
     private final Map<String, BiFunction<connectorRabbitMQConsume, String, ValidationStrategy>> optionalValidationStrategiesMap = Map.of(
@@ -79,11 +67,7 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
         QUEUENAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
         PERSISTENCE_ID_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
         USERNAME_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam,
-        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam/*,
-        DURABLE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
-        EXCLUSIVE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
-        AUTODELETE_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalBooleanParam,
-        ARGUMENTS_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalMapParam*/
+        PASSWORD_INPUT_PARAMETER, (instance, paramName) -> instance::validateOptionalStringParam
     );
 
     public connectorRabbitMQConsume() {
@@ -123,22 +107,6 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     protected final java.lang.String getPassword() {
         return (java.lang.String) getInputParameter(PASSWORD_INPUT_PARAMETER);
     }
-/*
-    protected final java.lang.Boolean getDurable() {
-        return (java.lang.Boolean) getInputParameter(DURABLE_INPUT_PARAMETER);
-    }
-    
-    protected final java.lang.Boolean getExclusive() {
-        return (java.lang.Boolean) getInputParameter(EXCLUSIVE_INPUT_PARAMETER);
-    }
-    
-    protected final java.lang.Boolean getAutoDelete() {
-        return (java.lang.Boolean) getInputParameter(AUTODELETE_INPUT_PARAMETER);
-    }
-    
-    protected final java.util.Map<java.lang.String, java.lang.Object> getArguments() {
-        return (java.util.Map<java.lang.String, java.lang.Object>) getInputParameter(ARGUMENTS_INPUT_PARAMETER);
-    }*/
 
     protected final void setReceivedMessage(java.lang.String receivedMessage) {
         setOutputParameter(RECEIVEDMESSAGE_OUTPUT_PARAMETER, receivedMessage);
@@ -284,8 +252,25 @@ public class connectorRabbitMQConsume extends AbstractConnector implements Rabbi
     }
 
     private boolean hayMensajesEnCola(Channel channel) throws IOException {
-        AMQP.Queue.DeclareOk queueInfo = channel.queueDeclarePassive(getQueueName());
-        return queueInfo.getMessageCount() > 0;
+        try {
+            AMQP.Queue.DeclareOk queueInfo = channel.queueDeclarePassive(getQueueName());
+            return queueInfo.getMessageCount() > 0;
+        } catch (ShutdownSignalException e) {
+            if (e.getReason() instanceof AMQP.Channel.Close) {
+                AMQP.Channel.Close close = (AMQP.Channel.Close) e.getReason();
+                if (close.getReplyCode() == 404) {
+                    // La cola no existe (NOT_FOUND)
+                    LOGGER.log(Level.WARNING, "La cola {} no existe.", getQueueName());
+                    return false; 
+                } else {
+                    LOGGER.log(Level.SEVERE, "[ERROR] Exception ShutdownSignalException not handled. - {}", e.getMessage());
+                    throw e;
+                }
+            } else {
+                LOGGER.log(Level.SEVERE, "[ERROR] It is not an AMQP.Channel.Close - {}", e.getMessage());
+                throw e;
+            }
+        }
     }
 
     private Boolean checkPersistenceId(String jsonString) throws ConnectorException {
