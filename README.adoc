@@ -15,7 +15,7 @@
 :doc-url: https://documentation.bonitasoft.com/bonita/{short-bonita-version}
 :java-version: 17
 
-= filter-action-based-task-assignation
+= Action Based Task Assignation Filter
 
 The project **filter-action-based-task-assignation** is a Bonita actor filter designed for the **Bonita {short-bonita-version} ({short-bonita-tech-version})**  version, specifically to be used with the **ProcessBuilder** project. It is written in `java`.
 
@@ -37,105 +37,67 @@ For detailed information on how to create a custom actor filter, please refer to
 
 == Developing
 
-Here's a brief introduction on how to get started with this project.
+To start developing this project, make sure you have the following tools installed:
 
-Prerequisites:
+- Java ( **jdk {java-version}** or higher): This project is built with Java, so you'll need the Java Development Kit.
+- Maven (optional if you choosed to use https://github.com/takari/maven-wrapper[maven wrapper script] as archetype option): To manage dependencies and the project lifecycle. While the included Maven Wrapper (./mvnw) is sufficient, having Maven installed globally can be helpful.
+- A Git client: To clone the repository and contribute your changes.
 
-  - Java (**jdk {java-version}** or higher)
-  - Maven (optional, but highly recommended)
-  - A Git client
-
-=== Building
-
-To build the project after making code changes, follow these steps:
-
-```bash
-git clone https://github.com/your-username/filter-action-based-task-assignation.git
-cd filter-action-based-task-assignation/
-./mvnw package
-```
-
-The build will produce a JAR file named `filter-action-based-task-assignation-1.0-SNAPSHOT.jar` in the `target/` folder.
-
-This command compiles the source code, runs tests, and packages the filter into a distributable JAR file, ensuring all dependencies are included.
-
-For more details about Apache Maven, please refer to the https://maven.apache.org/guides/getting-started/[documentation].
-
-=== Deploying / Publishing
-
-Once built, you can install the filter in your Bonita project.
-
-{doc-url}/managing-extension-studio[Install the actor filter in your Bonita project using the Studio, window = "\_blank"].
-
-== Contributing
-
-We welcome contributions from the community\! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are always welcome.
-
-If there is anything else you need to know, please refer to our `CONTRIBUTING.adoc` file.
-
-== Features
-
-_**TODO**_: What's all the bells and whistles this project can perform?
-
-* What's the main functionality
-* You can also do another thing
-* If you get really handy, you can even do this
-
-== Getting started
-
-_**TODO**_: A quick introduction of the minimal setup you need to get a hello world up &
-running.
-For more details on Bonita Actor Fitler please refer to {doc-url}/actor-filter-archetype[documentation]
-
-== Developing
-_**TODO**_: Here's a brief introduction about what a developer must do in order to start developing
-the project further:
-
-Prerequisite:
-
-- Java ( **jdk {java-version}** or higher)
-- Maven (optional if you choosed to use https://github.com/takari/maven-wrapper[maven wrapper script] as archetype option)
-- A Git client (optional but highly recommended)
+Once you have everything set up, clone the repository and navigate to the project directory to start working.
 
 === Building
 
-_**TODO**_: If your project needs some additional steps for the developer to build the
-project after some code changes, state them here:
+To build the project in your local environment, follow these steps. This is useful for development and testing before publishing.
 
 [source,bash]
 ----
-git clone https://your.github.com/filter-action-based-task-assignment.git
+git clone https://github.com/your-username/filter-action-based-task-assignment.git
 cd filter-action-based-task-assignment/
-./mwnw package
-----
+./mvnw clean package
+-----
 
-The build should produce a jar archive under the `target/` folder named `filter-action-based-task-assignment-1.0.jar`
+Once the command is executed, the `filter-action-based-task-assignment-1.0.jar` artifact is created inside the `target/` directory. This process compiles the code, runs tests, and packages the filter into a `.jar` file.
 
-_**TODO**_: Here again you should state what actually happens when the code above gets
-executed.
+For more details about Apache Maven, you can refer to its [documentation](https://maven.apache.org/guides/getting-started/).
 
-For more details about Apache Maven, please refer to the https://maven.apache.org/guides/getting-started/[documentation]
+=== Deploying and Publishing
 
-=== Deploying / Publishing
+To deploy and publish this project, we've automated the process using GitHub Actions. This means you **don't need to manually compile it** for publication.
 
-_**TODO**_: In case there's some step you have to take that publishes this project to a server, this is the right time to state it.
+The CI/CD workflow automatically handles compiling and testing the project every time changes are pushed to a branch.
 
-{doc-url}/managing-extension-studio[Install the actor filter in your Bonita project using the Studio, window = "_blank"].
+To publish the filter and make it available for the presales team, simply follow these two steps:
+
+1.  **Create a tag**: Add a tag to the `master` branch (for example, `v1.0.0`).
+2.  **Create a release**: In GitHub, go to the releases section and create a new release from the tag you just created.
+
+This will trigger a GitHub Action that compiles the project, generates the final artifact, and attaches it to the release.
+
+If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the [Bonita documentation](https://www.google.com/search?q=https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio).
+
 
 == Contributing
 
-_**TODO**_: Make easy to your team to jump in and start contributing to your project.
+To facilitate collaboration, we want to ensure all code is clean and adheres to our standards. We will use a dedicated branch for all development, following the principles of Clean Code and the Git Flow workflow.
 
-These paragraphs are meant to welcome those kind souls to feel that they are
-needed. You should state something like:
+Clean Code refers to writing code that is readable, maintainable, and easy to understand. Git Flow is a Git branching strategy that organizes development, features, and releases in a structured manner.
 
-"If you'd like to contribute, please fork the repository and use a feature
-branch. Pull requests are warmly welcome."
+To begin contributing, create a branch from master and name it using the ID of the Jira ticket or user story.
 
-If there's anything else the developer needs to know (e.g. the code style
-guide), you should link it here. If there's a lot of things to take into
-consideration, it is common to separate this section to its own file called
-`CONTRIBUTING.adoc` (or similar). If so, you should say that it exists here.
+[source,bash]
+----
+# Create and switch to your new branch
+git checkout -b <jira-ticket-id>_<short-description> master
+If the develop branch does not already exist, create it from master and push it to the repository.
+----
+
+[source,bash]
+----
+git checkout -b develop master
+git push origin develop
+---- 
+
+Once your work is complete, submit a pull request to the develop branch. Please ensure your code follows our established conventions and that all tests pass.
 
 == Links
 
@@ -144,13 +106,8 @@ format like in a .json file, it's good to include a summary of most useful
 links to humans using your project. You can include links like:
 == Links
 
-  * **Project homepage**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation
-  * **Repository**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation.git
-  * **Issue tracker**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation/issues
+  * **Project homepage**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation
+  * **Repository**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation.git
+  * **Issue tracker**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation/issues
 
-. Project homepage: https://your.github.com/awesome-project/
-. Repository: https://github.com/your/awesome-project/
-. Issue tracker: https://github.com/your/awesome-project/issues
-.. In case of sensitive bugs like security vulnerabilities, please contact
-    my@email.com directly instead of using issue tracker. We value your effort
-    to improve the security and privacy of this project!
+
