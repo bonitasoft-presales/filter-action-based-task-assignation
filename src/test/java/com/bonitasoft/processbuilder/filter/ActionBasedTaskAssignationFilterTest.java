@@ -1,94 +1,83 @@
 package com.bonitasoft.processbuilder.filter;
 
 import org.bonitasoft.engine.api.APIAccessor;
+import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
+import org.bonitasoft.engine.bpm.process.ProcessInstance;
+import org.bonitasoft.engine.bpm.process.ProcessInstanceNotFoundException;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
 import org.bonitasoft.engine.connector.EngineExecutionContext;
 import org.bonitasoft.engine.filter.UserFilterException;
+import org.bonitasoft.engine.identity.User;
+import org.bonitasoft.engine.search.SearchResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import static com.bonitasoft.processbuilder.filter.ActionBasedTaskAssignationFilter.MAXIMUM_WORKLOAD_INPUT;
-import static java.util.Arrays.asList;
+import static com.bonitasoft.processbuilder.filter.ActionBasedTaskAssignationFilter.USERS_INPUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ActionBasedTaskAssignationFilterTest {
 
     @InjectMocks
     private ActionBasedTaskAssignationFilter filter;
 
-    @Mock(lenient = true)
+    @Mock
     private APIAccessor apiAccessor;
-    @Mock(lenient = true)
+    @Mock
     private ProcessAPI processApi;
-
-    @Mock(lenient = true)
+    @Mock
+    private IdentityAPI identityAPI;
+    @Mock
     private EngineExecutionContext executionContext;
 
-    @BeforeEach
-    void setUp() {
-        when(apiAccessor.getProcessAPI()).thenReturn(processApi);
-        when(executionContext.getProcessDefinitionId()).thenReturn(1L);
-    }
+    private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilterTest.class.getName());
+
+    // --- Validation Tests ---
 
     @Test
-    public void should_throw_exception_if_mandatory_input_is_missing() {
-        assertThrows(ConnectorValidationException.class, () ->
-                filter.validateInputParameters()
-        );
-    }
-
-    @Test
-    public void should_throw_exception_if_mandatory_input_is_not_positive_integer() {
+    void validateInputParameters_should_throw_exception_if_input_is_null() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, -1);
-        filter.setInputParameters(parameters);
-        assertThrows(ConnectorValidationException.class, () ->
-                filter.validateInputParameters()
-        );
-    }
-
-    @Test
-    public void should_throw_exception_if_mandatory_input_is_not_an_integer() {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, "1");
-        filter.setInputParameters(parameters);
-        assertThrows(ConnectorValidationException.class, () ->
-                filter.validateInputParameters()
-        );
-    }
-
-    @Test
-    public void should_return_a_list_of_candidates() throws UserFilterException {
-        // Given
-        when(processApi.getUserIdsForActor(anyLong(), eq("MyActor"), eq(0), eq(Integer.MAX_VALUE)))
-                .thenReturn(asList(1L, 2L, 3L));
-        when(processApi.getNumberOfAssignedHumanTaskInstances(1L)).thenReturn(2L);
-        when(processApi.getNumberOfAssignedHumanTaskInstances(2L)).thenReturn(3L);
-        when(processApi.getNumberOfAssignedHumanTaskInstances(3L)).thenReturn(0L);
-
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, 3);
         filter.setInputParameters(parameters);
 
-        // When
-        List<Long> candidates = filter.filter("MyActor");
-
-        // Then
-        assertThat(candidates).as("Only users with a workload below the maximum can be candidates.")
-                .containsExactly(1L, 3L);
-
+        assertThrows(ConnectorValidationException.class, () -> filter.validateInputParameters());
     }
+
+    @Test
+    void validateInputParameters_should_throw_exception_if_input_is_malformed_json() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(USERS_INPUT, "invalid json");
+        filter.setInputParameters(parameters);
+
+        assertThrows(ConnectorValidationException.class, () -> filter.validateInputParameters());
+    }
+
+    @Test
+    void validateInputParameters_should_throw_exception_if_json_structure_is_invalid() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(USERS_INPUT, "{\"initiator\": \"true\", \"users\": null, \"memberShips\": null}");
+        filter.setInputParameters(parameters);
+
+        assertThrows(ConnectorValidationException.class, () -> filter.validateInputParameters());
+    }
+    
 
 }

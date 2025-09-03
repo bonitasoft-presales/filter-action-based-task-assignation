@@ -1,2 +1,3 @@
-com\bonitasoft\presales\connector\connectorRabbitMQ.class
-com\bonitasoft\presales\connector\RabbitMQConstants.class
+com\bonitasoft\processbuilder\filter\ActionBasedTaskAssignationFilter$InvolvedUsersData.class
+com\bonitasoft\processbuilder\filter\ActionBasedTaskAssignationFilter$Membership.class
+com\bonitasoft\processbuilder\filter\ActionBasedTaskAssignationFilter.class
