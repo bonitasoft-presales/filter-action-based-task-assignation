@@ -5,7 +5,7 @@
 
     <groupId>com.bonitasoft.processbuilder.filter</groupId>
     <artifactId>filter-action-based-task-assignment</artifactId>
-    <version>1.0</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>filter-action-based-task-assignment</name>
     <packaging>jar</packaging>
     
