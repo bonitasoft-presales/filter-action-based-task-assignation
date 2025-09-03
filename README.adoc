@@ -13,13 +13,13 @@
 :short-bonita-version: 10.2.0
 :doc-url: https://documentation.bonitasoft.com/bonita/{short-bonita-version}
 :java-version: 17
-\= filter-action-based-task-assignation
+= filter-action-based-task-assignation
 
 The project **filter-action-based-task-assignation** is a Bonita actor filter designed for the **Bonita {short-bonita-version}** version, specifically to be used with the **ProcessBuilder** project. It is written in `java`.
 
 This actor filter's purpose is to dynamically assign task candidates based on the actions or roles defined within the process. It enhances the flexibility and efficiency of task assignments in human tasks by linking them to specific, actionable business logic.
 
-\== Features
+== Features
 
 This filter provides a robust and flexible way to manage task assignment:
 
@@ -27,13 +27,13 @@ This filter provides a robust and flexible way to manage task assignment:
   * **Role-based Filtering**: Restricts candidates to users who have a specific role or are part of a particular group.
   * **Integration with Business Logic**: Allows task assignment to be directly driven by the data and logic of your process.
 
-\== Getting started
+== Getting started
 
 To get started, you'll need to create your project from the Bonita actor filter archetype and then customize the filter logic to meet your specific needs.
 
 For detailed information on how to create a custom actor filter, please refer to the {doc-url}/process/actor-filter-archetype[Bonita documentation, window = "\_blank"].
 
-\== Developing
+== Developing
 
 Here's a brief introduction on how to get started with this project.
 
@@ -43,7 +43,7 @@ Prerequisites:
   - Maven (optional, but highly recommended)
   - A Git client
 
-\=== Building
+=== Building
 
 To build the project after making code changes, follow these steps:
 
@@ -57,19 +57,19 @@ This command compiles the source code, runs tests, and packages the filter into 
 
 For more details about Apache Maven, please refer to the https://maven.apache.org/guides/getting-started/[documentation].
 
-\=== Deploying / Publishing
+=== Deploying / Publishing
 
 Once built, you can install the filter in your Bonita project.
 
 {doc-url}/managing-extension-studio[Install the actor filter in your Bonita project using the Studio, window = "\_blank"].
 
-\== Contributing
+== Contributing
 
 We welcome contributions from the community\! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are always welcome.
 
 If there is anything else you need to know, please refer to our `CONTRIBUTING.adoc` file.
 
-\== Links
+== Links
 
   * **Project homepage**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation
   * **Repository**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation.git
