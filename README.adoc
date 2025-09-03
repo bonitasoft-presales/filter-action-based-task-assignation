@@ -14,12 +14,12 @@
 :short-bonita-version: 2024.3
 :doc-url: https://documentation.bonitasoft.com/bonita/{short-bonita-version}
 :java-version: 17
-= filter-action-based-task-assignment
+
+= filter-action-based-task-assignation
 
 The project **filter-action-based-task-assignation** is a Bonita actor filter designed for the **Bonita {short-bonita-version} ({short-bonita-tech-version})**  version, specifically to be used with the **ProcessBuilder** project. It is written in `java`.
 
 This actor filter's purpose is to dynamically assign task candidates based on the actions or roles defined within the process. It enhances the flexibility and efficiency of task assignments in human tasks by linking them to specific, actionable business logic.
-
 
 == Features
 
@@ -142,6 +142,7 @@ consideration, it is common to separate this section to its own file called
 _**TODO**_: Even though this information can be found inside the project on machine-readable
 format like in a .json file, it's good to include a summary of most useful
 links to humans using your project. You can include links like:
+== Links
 
   * **Project homepage**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation
   * **Repository**: https://www.google.com/search?q=https://github.com/your-username/filter-action-based-task-assignation.git
