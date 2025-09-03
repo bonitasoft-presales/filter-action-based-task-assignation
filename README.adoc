@@ -49,12 +49,11 @@ Once you have everything set up, clone the repository and navigate to the projec
 
 To build the project in your local environment, follow these steps. This is useful for development and testing before publishing.
 
-[source,bash]
-----
+```bash
 git clone https://github.com/your-username/filter-action-based-task-assignment.git
 cd filter-action-based-task-assignment/
 ./mvnw clean package
------
+```
 
 Once the command is executed, the `filter-action-based-task-assignment-1.0.jar` artifact is created inside the `target/` directory. This process compiles the code, runs tests, and packages the filter into a `.jar` file.
 
@@ -84,18 +83,16 @@ Clean Code refers to writing code that is readable, maintainable, and easy to un
 
 To begin contributing, create a branch from master and name it using the ID of the Jira ticket or user story.
 
-[source,bash]
-----
+```bash
 # Create and switch to your new branch
 git checkout -b <jira-ticket-id>_<short-description> master
 If the develop branch does not already exist, create it from master and push it to the repository.
-----
+```
 
-[source,bash]
-----
+```bash
 git checkout -b develop master
 git push origin develop
----- 
+``` 
 
 Once your work is complete, submit a pull request to the develop branch. Please ensure your code follows our established conventions and that all tests pass.
 
@@ -111,3 +108,6 @@ links to humans using your project. You can include links like:
   * **Issue tracker**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation/issues
 
 
+To build the project in your local environment (useful for development and testing), follow these steps:
+
+ 
