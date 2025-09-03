@@ -31,8 +31,10 @@ jobs:
       - name: Clean workspace
         run: git clean -fdX
 
-      - name: Prepare release
-        run: ./mvnw release:prepare --batch-mode -Dusername=bonitasoft-presales -Dpassword=${{ secrets.GITHUB_TOKEN }}
+      - name: Run Maven Release Prepare
+        run: ./mvnw --batch-mode release:prepare -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   create-release:
     name: Create Release
