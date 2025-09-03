@@ -1,38 +1,35 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.bonitasoft.presales.connector</groupId>
-    <artifactId>connector-rabbitmq-consume</artifactId>
-    <version>0.0.2.10.1-SNAPSHOT</version>
-    <name>connector-rabbitmq-consume</name>
+    <groupId>com.bonitasoft.processbuilder.filter</groupId>
+    <artifactId>filter-action-based-task-assignment</artifactId>
+    <version>1.0</version>
+    <name>filter-action-based-task-assignment</name>
     <packaging>jar</packaging>
-
+    
     <properties>
-        <!-- Github-->
-        <github.owner>bonitasoft-presales</github.owner>
-        <github.repo>${project.artifactId}</github.repo>
-
         <!-- Maven -->
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.build.timestamp.format>yyyy.MM.dd-hh.mm</maven.build.timestamp.format>
 
-        <!-- Connector -->
-        <connector-definition-id>${project.artifactId}</connector-definition-id>
-        <connector-definition-version>1.0.0</connector-definition-version>
-        <connector-impl-id>${connector-definition-id}-impl</connector-impl-id>
-        <connector-impl-version>${project.version}</connector-impl-version>
-        <connector-main-class>com.bonitasoft.presales.connector.connectorRabbitMQConsume</connector-main-class>
+        <!-- Actor filter -->
+        <definition-id>${project.artifactId}</definition-id>
+        <definition-version>1.0.0</definition-version>
+        <impl-id>${definition-id}-impl</impl-id>
+        <impl-version>${project.version}</impl-version>
+        <impl-main-class>com.bonitasoft.processbuilder.filter.ActionBasedTaskAssignationFilter</impl-main-class>
 
         <!-- Bonita -->
         <bonita-runtime.version>10.2.0</bonita-runtime.version>
 
         <!-- Tests -->
-        <junit-jupiter-engine.version>5.10.0</junit-jupiter-engine.version>
+        <junit-jupiter-engine.version>5.10.1</junit-jupiter-engine.version>
         <assertj-core.version>3.24.2</assertj-core.version>
         <mockito-core.version>5.6.0</mockito-core.version>
-        <logback-classic.version>1.5.17</logback-classic.version>
+        <logback-classic.version>1.2.12</logback-classic.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -41,13 +38,10 @@
         <groovy-maven-plugin.version>2.1.1</groovy-maven-plugin.version>
         <groovy-xml.version>3.0.19</groovy-xml.version>
         <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
-
-
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Bonita -->
             <dependency>
                 <groupId>org.bonitasoft.runtime</groupId>
                 <artifactId>bonita-runtime-bom</artifactId>
@@ -64,13 +58,6 @@
             <artifactId>bonita-common</artifactId>
             <groupId>org.bonitasoft.engine</groupId>
             <scope>provided</scope>
-        </dependency>
-
-        <!-- RabbitMQ -->
-        <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>5.25.0</version>
         </dependency>
 
         <!-- Tests -->
@@ -98,23 +85,11 @@
             <version>${logback-classic.version}</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-	        <groupId>org.testcontainers</groupId>
-	        <artifactId>rabbitmq</artifactId>
-	        <version>1.20.6</version> 
-	        <scope>test</scope>
-	    </dependency>
-	    <dependency>
-	        <groupId>org.testcontainers</groupId>
-	        <artifactId>junit-jupiter</artifactId>
-	        <version>1.20.6</version> 
-	        <scope>test</scope>
-	    </dependency>
 
     </dependencies>
-
+    
     <build>
-        <defaultGoal>package</defaultGoal>
+    	<defaultGoal>package</defaultGoal>
         <resources>
             <resource>
                 <directory>src/main/resources-filtered</directory>
@@ -125,7 +100,7 @@
                 <filtering>false</filtering>
             </resource>
         </resources>
-        <pluginManagement>
+       <pluginManagement>
             <plugins>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -217,5 +192,5 @@
             <url>https://maven.pkg.github.com/${github.owner}/${github.repo}</url>
         </repository>
     </distributionManagement>
-
+ 
 </project>
