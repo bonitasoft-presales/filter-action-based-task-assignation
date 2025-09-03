@@ -6,7 +6,7 @@
     <category icon="icon.png" id="Custom"/> <!-- The category of this definition, used in the Studio -->
   
     <!-- Actor filter inputs -->
-    <input mandatory="true" name="actionPersistenceId" type="java.lang.Long" defaultValue="3" />
+    <input mandatory="true" name="users" type="java.lang.String" />
     
     <!--
        Pages and widgets to use the actorfilter in the Bonita Studio.
@@ -16,6 +16,6 @@
        - Page and widget descriptions can be defined in the properties files (optional)
     -->
     <page id="initialPage">
-        <widget xsi:type="definition:Text" id="actionPersistenceIdWidget" inputName="actionPersistenceId"/>
+        <widget xsi:type="definition:Text" id="usersWidget" inputName="users"/>
     </page>
 </definition:ConnectorDefinition>
