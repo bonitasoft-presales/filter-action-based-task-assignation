@@ -129,6 +129,6 @@ jobs:
           asset_content_type: application/zip
 
       - name: Publish to Github Package
-        run: ./mvnw --batch-mode deploy
+        run: ./mvnw --batch-mode deploy -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
