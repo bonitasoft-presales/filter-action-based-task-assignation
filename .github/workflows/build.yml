@@ -16,6 +16,7 @@ on:
 # 'id-token: write' is required for OpenID Connect (OIDC) authentication for deployments.
 permissions:
   contents: read
+  packages: write 
   pages: write
   id-token: write
 
