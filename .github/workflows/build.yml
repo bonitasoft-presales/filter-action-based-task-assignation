@@ -53,3 +53,9 @@ jobs:
         run: ./mvnw --batch-mode deploy -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Subir informes
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-compilacion
+          path: target/site/
