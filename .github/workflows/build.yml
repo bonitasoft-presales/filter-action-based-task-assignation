@@ -1,5 +1,5 @@
 # The name of the workflow as it appears in the GitHub Actions tab.
-name: Build and Deploy
+name: Build and Deploy Pages
 
 # Defines the events that trigger this workflow. It runs on every push to the 'main' branch,
 # every pull request to 'main', and can also be triggered manually from the GitHub UI.

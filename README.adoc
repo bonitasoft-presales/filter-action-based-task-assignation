@@ -98,6 +98,19 @@ target/site/jacoco/index.html
 
 This report provides a detailed view of your test coverage, highlighting which lines of code are executed by your unit tests and which are not.
 
+=== Activating Documentation on GitHub Pages
+To view your Javadoc documentation and JaCoCo reports online, you must activate GitHub Pages for your repository. The GitHub Actions workflow will handle the deployment automatically, but the initial configuration needs to be done only once.
+
+Follow these steps to enable GitHub Pages:
+
+* In your GitHub repository, navigate to Settings.
+* In the left-hand menu, click on Pages.
+* In the "Build and deployment" section, select GitHub Actions from the "Source" dropdown menu.
+* Click Save.
+
+Once your CI/CD workflow has run successfully, your documentation will be available at the GitHub Pages URL assigned to your repository.
+
+
 == Contributing
 
 To facilitate collaboration, we want to ensure all code is clean and adheres to our standards. We will use a dedicated branch for all development, following the principles of Clean Code and the Git Flow workflow.
