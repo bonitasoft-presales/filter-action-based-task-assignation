@@ -206,17 +206,6 @@
                             <goal>jar</goal>
                         </goals>
                     </execution>
-                    <execution>
-                    <id>site-javadoc</id>
-                    <phase>site</phase>
-                    <goals>
-                        <goal>javadoc</goal>
-                    </goals>
-                    <configuration>
-                        <reportOutputDirectory>${project.build.directory}/site</reportOutputDirectory>
-                        <destDir>apidocs</destDir>
-                    </configuration>
-                </execution>
                 </executions>
                 <configuration>
                     <source>17</source> 
