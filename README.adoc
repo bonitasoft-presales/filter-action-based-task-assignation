@@ -111,7 +111,7 @@ You can access the generated reports and documentation in two ways:
 To view the generated reports on your local machine, simply open the corresponding files in your web browser:
 
 * **Project Site Homepage**: file:///<your-project-path>/target/site/index.html
-* **Javadoc API Documentation**: file:///<your-project-path>/target/site/apidocs/index.html
+* **Javadoc API Documentation**: file:///<your-project-path>/target/reports/apidocs/index.html
 * **JaCoCo Code Coverage Report**: file:///<your-project-path>/target/site/jacoco/index.html
 
 2. **Online Access (GitHub Pages)**
