@@ -91,29 +91,28 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
             }
 
             // 3. Validate the existence and type of each required field.
-            validateField(usersNode, "initiator", JsonNode::isBoolean);
-            validateField(usersNode, "users", JsonNode::isArray);
-            validateField(usersNode, "memberShips", JsonNode::isArray);
+            validateField(usersNode, "initiator", JsonNode::isBoolean, "initiator");
+            validateField(usersNode, "users", JsonNode::isArray, "users");
+            validateField(usersNode, "memberShips", JsonNode::isArray, "memberShips");
 
         } catch (ClassCastException e) {
             throw new ConnectorValidationException(String.format("Parameter '%s' must be a String.", inputName));
         } catch (Exception e) {
-            throw new ConnectorValidationException(String.format("Invalid JSON structure for parameter '%s'.", inputName));
+            throw new ConnectorValidationException(String.format("Invalid JSON structure for parameter '%s' - ERROR: '%s'.", inputName, e.getMessage()));
         }
     }
-
+   
     /**
      * A utility method to validate the existence and type of a specific field.
      * This pattern is a great way to reuse validation logic and make the code cleaner.
      */
-    private void validateField(JsonNode parentNode, String fieldName, java.util.function.Predicate<JsonNode> typeCheck) throws ConnectorValidationException {
+    private void validateField(JsonNode parentNode, String fieldName, java.util.function.Predicate<JsonNode> typeCheck, String errorMessageField) throws ConnectorValidationException {
         JsonNode fieldNode = parentNode.get(fieldName);
         
-        // The Optional pattern is a safe way to handle nulls in modern Java.
         Optional.ofNullable(fieldNode)
             .filter(typeCheck)
             .orElseThrow(() -> new ConnectorValidationException(
-                String.format("Mandatory field '%s' is missing or has an invalid type.", fieldName)));
+                String.format("Mandatory field '%s' is missing or has an invalid type.", errorMessageField)));
     }
 
     /**
