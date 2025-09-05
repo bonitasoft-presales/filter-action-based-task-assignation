@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and Test
         run: |
-          ./mvnw clean verify
+          ./mvnw clean verify site
 
       - name: Get version
         id: get-version

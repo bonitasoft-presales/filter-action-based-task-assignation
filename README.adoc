@@ -74,6 +74,29 @@ This will trigger a GitHub Action that compiles the project, generates the final
 
 If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the [Bonita documentation](https://www.google.com/search?q=https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio).
 
+== Documentation
+
+This project uses Maven to generate its documentation. You can build the documentation site locally with the following command:
+```bash
+./mvnw clean verify site
+```
+After running the command, you can access the generated documentation and reports in the target/site directory.
+
+=== Javadoc Documentation
+
+The Javadoc documentation for the project's source code is located in:
+
+target/site/apidocs/index.html
+
+Here, you can find the detailed API documentation, including method descriptions, parameters, and return values for all classes.
+
+=== Code Coverage Report
+
+The JaCoCo code coverage report is located in:
+
+target/site/jacoco/index.html
+
+This report provides a detailed view of your test coverage, highlighting which lines of code are executed by your unit tests and which are not.
 
 == Contributing
 
@@ -101,7 +124,7 @@ Once your work is complete, submit a pull request to the develop branch. Please 
 _**TODO**_: Even though this information can be found inside the project on machine-readable
 format like in a .json file, it's good to include a summary of most useful
 links to humans using your project. You can include links like:
-== Links
+=== Links
 
   * **Project homepage**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation
   * **Repository**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation.git
@@ -110,4 +133,5 @@ links to humans using your project. You can include links like:
 
 To build the project in your local environment (useful for development and testing), follow these steps:
 
- 
+ mvn javadoc:javadoc
+ mvn clean install site
