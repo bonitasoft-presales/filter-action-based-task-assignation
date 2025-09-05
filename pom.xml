@@ -208,8 +208,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>17</source> <encoding>UTF-8</encoding>
-                    <doclint>none</doclint> </configuration>
+                    <source>17</source> 
+                    <encoding>UTF-8</encoding>
+                    <reportOutputDirectory>${project.build.directory}/site</reportOutputDirectory>
+                    <doclint>none</doclint> 
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
