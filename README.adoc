@@ -146,10 +146,13 @@ git push origin develop
 Once your work is complete, submit a pull request to the develop branch. Please ensure your code follows our established conventions and that all tests pass.
 
 
-=== Links
+== Links
   * **Project homepage**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation
   * **Repository**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation.git
   * **Issue tracker**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation/issues
+  * **Project Site Homepage**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/
+  * **Javadoc API Documentation**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/apidocs/index.html
+  * **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/jacoco/index.html
 
 To build the project in your local environment (useful for development and testing), follow these steps:
 
