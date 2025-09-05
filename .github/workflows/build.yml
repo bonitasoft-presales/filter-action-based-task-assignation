@@ -82,12 +82,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
+      # This step consolidates Javadoc and JaCoCo reports into a single directory
+      # for a clean deployment to GitHub Pages.
+      - name: Unify reports for deployment
+        run: |
+          mkdir -p target/unified-reports/
+          cp -r target/site/* target/unified-reports/
+          cp -r target/reports/* target/unified-reports/
+
       # Uploads the generated site documentation (Javadoc & JaCoCo reports) as a workflow artifact.
       # This artifact will be used by the 'deploy' job.
       - name: Upload reports for Pages deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'target/site'
+          path: 'target/unified-reports'
 
   # The 'deploy' job is responsible for deploying the site artifact to GitHub Pages.
   deploy:
