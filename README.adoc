@@ -74,41 +74,54 @@ This will trigger a GitHub Action that compiles the project, generates the final
 
 If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the [Bonita documentation](https://www.google.com/search?q=https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio).
 
-== Documentation
+=== Documentation
 
-This project uses Maven to generate its documentation. You can build the documentation site locally with the following command:
+This project uses Maven to build the application and generate its documentation. The process automatically creates API documentation and a code coverage report, which can be viewed both locally and online.
+
+### Building the Project
+
+To build the project and generate all reports locally, run the following command from the project root directory:
+
 ```bash
 ./mvnw clean verify site
 ```
-After running the command, you can access the generated documentation and reports in the target/site directory.
 
-=== Javadoc Documentation
+This command performs several key actions:
 
-The Javadoc documentation for the project's source code is located in:
+1.  clean: Deletes the target directory, ensuring a clean build.
+2.  verify: Compiles the code, runs all unit tests, and verifies the project's quality.
+3.  site: Generates the documentation site, including Javadoc and JaCoCo reports, into the target/site directory.
 
-target/site/apidocs/index.html
+### Activating GitHub Pages for Documentation
+To view the Javadoc documentation and JaCoCo reports online, you must first enable GitHub Pages in your repository. This is a one-time configuration.
 
-Here, you can find the detailed API documentation, including method descriptions, parameters, and return values for all classes.
+Follow these steps to enable the deployment of your documentation via GitHub Actions:
 
-=== Code Coverage Report
+1.  In your GitHub repository, navigate to Settings.
+2.  In the left-hand menu, click on Pages.
+3.  In the "Build and deployment" section, select GitHub Actions from the "Source" dropdown menu.
+4.  Click Save.
 
-The JaCoCo code coverage report is located in:
+After a successful CI/CD workflow run, your documentation will be available online.
 
-target/site/jacoco/index.html
+### Accessing Reports and Documentation
+You can access the generated reports and documentation in two ways:
 
-This report provides a detailed view of your test coverage, highlighting which lines of code are executed by your unit tests and which are not.
+1. **Local Access**
+To view the generated reports on your local machine, simply open the corresponding files in your web browser:
 
-=== Activating Documentation on GitHub Pages
-To view your Javadoc documentation and JaCoCo reports online, you must activate GitHub Pages for your repository. The GitHub Actions workflow will handle the deployment automatically, but the initial configuration needs to be done only once.
+* **Project Site Homepage**: file:///<your-project-path>/target/site/index.html
+* **Javadoc API Documentation**: file:///<your-project-path>/target/site/apidocs/index.html
+* **JaCoCo Code Coverage Report**: file:///<your-project-path>/target/site/jacoco/index.html
 
-Follow these steps to enable GitHub Pages:
+2. **Online Access (GitHub Pages)**
+The documentation is automatically deployed to GitHub Pages after a successful workflow run. This provides a clean, web-accessible version of the reports.
 
-* In your GitHub repository, navigate to Settings.
-* In the left-hand menu, click on Pages.
-* In the "Build and deployment" section, select GitHub Actions from the "Source" dropdown menu.
-* Click Save.
+* **Project Site Homepage**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/
+* **Javadoc API Documentation**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/apidocs/index.html
+* **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/jacoco/index.html
 
-Once your CI/CD workflow has run successfully, your documentation will be available at the GitHub Pages URL assigned to your repository.
+The JaCoCo report provides a detailed view of your test coverage, highlighting which lines of code were executed by your unit tests and which were not.
 
 
 == Contributing
@@ -132,19 +145,11 @@ git push origin develop
 
 Once your work is complete, submit a pull request to the develop branch. Please ensure your code follows our established conventions and that all tests pass.
 
-== Links
 
-_**TODO**_: Even though this information can be found inside the project on machine-readable
-format like in a .json file, it's good to include a summary of most useful
-links to humans using your project. You can include links like:
 === Links
-
   * **Project homepage**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation
   * **Repository**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation.git
   * **Issue tracker**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation/issues
 
-
 To build the project in your local environment (useful for development and testing), follow these steps:
 
- mvn javadoc:javadoc
- mvn clean install site
