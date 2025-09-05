@@ -57,7 +57,7 @@ cd filter-action-based-task-assignment/
 
 Once the command is executed, the `filter-action-based-task-assignment-1.0.jar` artifact is created inside the `target/` directory. This process compiles the code, runs tests, and packages the filter into a `.jar` file.
 
-For more details about Apache Maven, you can refer to its [documentation](https://maven.apache.org/guides/getting-started/).
+For more details about Apache Maven, you can refer to its (https://maven.apache.org/guides/getting-started/.
 
 === Deploying and Publishing
 
@@ -72,7 +72,7 @@ To publish the filter and make it available for the presales team, simply follow
 
 This will trigger a GitHub Action that compiles the project, generates the final artifact, and attaches it to the release.
 
-If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the [Bonita documentation](https://www.google.com/search?q=https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio).
+If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio.
 
 === Documentation
 
