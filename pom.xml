@@ -229,6 +229,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${maven-checkstyle-plugin.version}</version>
+                <!--
+                    https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-6.1.1/sun_checks.xml
+                    https://raw.githubusercontent.com/checkstyle/checkstyle/master/src/main/resources/google_checks.xml
+                    https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-checkstyle-plugin/3.6.0/maven-checkstyle-plugin-3.6.0.jar /META-INF/maven/plugin.xml
+                -->
             </plugin>
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
@@ -302,6 +307,7 @@
                         </reports>
                     </reportSet>
                 </reportSets>
+                
             </plugin>
             
             <plugin>

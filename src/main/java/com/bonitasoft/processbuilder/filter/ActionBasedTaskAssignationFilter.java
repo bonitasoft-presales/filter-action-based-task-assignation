@@ -33,8 +33,15 @@ import java.util.Objects;
  */
 public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
 
+    /**
+     * A logger for this class, used to record log messages and provide debugging information.
+     */
     private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilter.class.getName());
 
+    /**
+     * The name of the input parameter that contains the JSON string with user data.
+     * This is a constant value to avoid "magic strings" in the code.
+     */
     static final String USERS_INPUT = "users";
 
     /**
@@ -52,7 +59,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @param inputName The name of the input parameter.
      * @throws ConnectorValidationException if the parameter is not a positive integer.
      */
-    protected void checkPositiveIntegerInput(String inputName) throws ConnectorValidationException {
+    protected void checkPositiveIntegerInput(final String inputName) throws ConnectorValidationException {
         try {
             Integer value = (Integer) getInputParameter(inputName);
             if (value == null || value <= 0) {
@@ -68,7 +75,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @param inputName The name of the input parameter.
      * @throws ConnectorValidationException if the parameter is not a positive long.
      */
-    protected void checkPositiveLongInput(String inputName) throws ConnectorValidationException {
+    protected void checkPositiveLongInput(final String inputName) throws ConnectorValidationException {
         try {
             Long value = (Long) getInputParameter(inputName);
             if (value == null || value <= 0) {
@@ -87,7 +94,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @throws ConnectorValidationException If the parameter is not a String, the JSON is malformed,
      * or it does not comply with the expected structure.
      */
-    public void validateUsersJson(String inputName) throws ConnectorValidationException {
+    public void validateUsersJson(final String inputName) throws ConnectorValidationException {
         String jsonString = null;
         try {
             jsonString = (String) getInputParameter(inputName);
@@ -123,14 +130,14 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @param memberShipsNode The JSON node containing the list of memberships.
      * @throws ConnectorValidationException if any membership is invalid.
      */
-    public void validateMemberships(JsonNode memberShipsNode) throws ConnectorValidationException {
+    public void validateMemberships(final JsonNode memberShipsNode) throws ConnectorValidationException {
         try {
             StreamSupport.stream(memberShipsNode.spliterator(), false)
                 .forEach(membership -> {
                     if (!membership.isObject()) {
                         throw new RuntimeException("Each element in 'memberShips' array must be a JSON object.");
                     }
-                    
+
                     JsonNode groupIdNode = membership.get("groupId");
                     JsonNode roleIdNode = membership.get("roleId");
 
@@ -154,9 +161,9 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @param errorMessageField The name of the field to use in the error message.
      * @throws ConnectorValidationException if the field is missing or has an invalid type.
      */
-    private void validateField(JsonNode parentNode, String fieldName, java.util.function.Predicate<JsonNode> typeCheck, String errorMessageField) throws ConnectorValidationException {
+    private void validateField(final JsonNode parentNode, final  String fieldName, final  java.util.function.Predicate<JsonNode> typeCheck, final  String errorMessageField) throws ConnectorValidationException {
         JsonNode fieldNode = parentNode.get(fieldName);
-        
+
         Optional.ofNullable(fieldNode)
             .filter(typeCheck)
             .orElseThrow(() -> new ConnectorValidationException(
@@ -173,9 +180,9 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @see AbstractUserFilter#shouldAutoAssignTaskIfSingleResult()
      */
     @Override
-    public List<Long> filter(String actorName) throws UserFilterException {
+    public List<Long> filter(final String actorName) throws UserFilterException {
         LOGGER.info(String.format("%s input = %s", USERS_INPUT, getInputParameter(USERS_INPUT)));
-        
+
         APIAccessor apiAccessor = getAPIAccessor();
         ProcessAPI processAPI = apiAccessor.getProcessAPI();
         IdentityAPI identityAPI = apiAccessor.getIdentityAPI();
@@ -188,7 +195,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
             LOGGER.severe("An unexpected error occurred during API accessor or JSON parsing: " + e.getMessage());
             throw new UserFilterException("Initialization failed due to unexpected error.", e);
         }
-        
+
         final Set<Long> userIds = new HashSet<>();
 
         // 1. Handle process initiator
@@ -214,14 +221,13 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
                 final SearchOptionsBuilder searchBuilder = new SearchOptionsBuilder(0, Integer.MAX_VALUE);
                 searchBuilder.filter(UserSearchDescriptor.ENABLED, true);
                 searchBuilder.and();
-                
+
                 searchBuilder.leftParenthesis();
                 boolean isFirst = true;
 
                 for (final Membership membership : involvedUsersData.memberships()) {
                     final Long groupId = membership.groupId();
                     final Long roleId = membership.roleId();
-                    
                     if (!isFirst) {
                         searchBuilder.or();
                     }
@@ -251,7 +257,6 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
                 LOGGER.severe("An error occurred during user search by membership: " + e.getMessage());
             }
         }
-        
         LOGGER.info(String.format("Final user list contains %d unique users.", userIds.size()));
         return new ArrayList<>(userIds);
     }
@@ -264,7 +269,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @return An InvolvedUsersData object containing the parsed data.
      * @throws IllegalArgumentException if the JSON string is null or has an invalid format.
      */
-    public InvolvedUsersData parseInvolvedUsersJson(String jsonString) {
+    public InvolvedUsersData parseInvolvedUsersJson(final String jsonString) {
         if (jsonString == null || jsonString.isEmpty()) {
             throw new IllegalArgumentException("Input JSON string cannot be null or empty.");
         }
@@ -330,13 +335,50 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
     }
 
     /**
-     * A record to hold the parsed data. Records are a clean way to model immutable data in Java 17.
+     * A record to hold the parsed data for involved users in a process.
+     * Records are a clean way to model immutable data in Java 17.
+     *
+     * @param initiator a boolean indicating if the process initiator should be included
+     * @param users a list of user IDs directly specified for the task
+     * @param memberships a list of memberships to find candidate users
      */
-    public record InvolvedUsersData(boolean initiator, List<Long> users, List<Membership> memberships) {}
+    public record InvolvedUsersData(boolean initiator, List<Long> users, List<Membership> memberships) {
+        /**
+         * The compact constructor for this record. It creates defensive copies
+         * of the mutable lists to ensure the record's immutability.
+         */
+        public InvolvedUsersData {
+            users = new ArrayList<>(users);
+            memberships = new ArrayList<>(memberships);
+        }
+
+        /**
+         * Returns a defensive copy of the users list to preserve immutability.
+         *
+         * @return a new ArrayList containing the user IDs.
+         */
+        public List<Long> users() {
+            return new ArrayList<>(this.users);
+        }
+
+        /**
+         * Returns a defensive copy of the memberships list to preserve immutability.
+         *
+         * @return a new ArrayList containing the membership objects.
+         */
+        public List<Membership> memberships() {
+            return new ArrayList<>(this.memberships);
+        }
+    }
 
     /**
-     * A record to model the membership object.
+     * A record to model a membership object, which can be defined by a group, a role,
+     * or a reference to a membership from the process definition.
+     *
+     * @param groupId the ID of the group
+     * @param roleId the ID of the role
+     * @param memberShipsRef a string reference to a membership
      */
-    public record Membership(Long groupId, Long roleId, String memberShipsRef) {}
+    public record Membership(Long groupId, Long roleId, String memberShipsRef) { }
 }
 
