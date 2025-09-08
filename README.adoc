@@ -45,6 +45,46 @@ To start developing this project, make sure you have the following tools install
 
 Once you have everything set up, clone the repository and navigate to the project directory to start working.
 
+=== Project Versioning
+
+This project's version is managed using **Apache Maven**. The project version is defined in the `<version>` tag of the `pom.xml` file. It's crucial to understand how this version is used and updated, as it directly impacts how the project is built and released.
+
+[source, xml]
+----
+<project>
+  ...
+  <version>${project.version}</version>
+  ...
+  <properties>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+  </properties>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven-release-plugin.version}</version>
+          <configuration>
+            <tagNameFormat>v@{project.version}</tagNameFormat>
+            <indentSize>4</indentSize>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+----
+
+==== How the Version is Used
+
+* **`@{project.version}`**: This is a Maven variable that automatically references the project's current version from the `pom.xml`. This variable is used in the `maven-release-plugin`'s `<tagNameFormat>v@{project.version}</tagNameFormat>` configuration to create consistent tags.
+* **Tagging**: When the `release:prepare` goal is executed (as part of the `Tag and Release` workflow), a tag is created in the Git repository using the format `v` followed by the project's version. For example, if the `pom.xml` version is `1.0.0`, the created tag will be `v1.0.0`.
+* **Release**: The GitHub Actions workflow (`tagAndRelease.yml`) is configured to automatically create a new GitHub Release based on this `v<version>` tag. This ensures that the releases and the project versions in the `pom.xml` are always synchronized.
+
+**What This Means for You:**
+
+To create a new release, you don't need to manually update the version in the `pom.xml`. The **`Tag and Release`** workflow (triggered via `workflow_dispatch`) handles this automatically. It increments the version, creates a Git tag, and publishes the new release. Your manual interaction is limited to triggering the workflow and confirming the new release version. This process simplifies versioning and reduces the risk of errors.
+
 === Building
 
 To build the project in your local environment, follow these steps. This is useful for development and testing before publishing.
