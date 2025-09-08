@@ -3,7 +3,7 @@ package com.bonitasoft.processbuilder.filter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
 import org.bonitasoft.engine.api.APIAccessor;
@@ -18,6 +18,8 @@ import org.bonitasoft.engine.identity.User;
 import org.bonitasoft.engine.identity.UserSearchDescriptor;
 import org.bonitasoft.engine.search.SearchOptionsBuilder;
 import org.bonitasoft.engine.search.SearchResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +38,8 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
     /**
      * A logger for this class, used to record log messages and provide debugging information.
      */
-    private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilter.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionBasedTaskAssignationFilter.class);
+    //private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilter.class.getName());
 
     /**
      * The name of the input parameter that contains the JSON string with user data.
@@ -194,7 +197,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
         try {
             involvedUsersData = parseInvolvedUsersJson((String) getInputParameter(USERS_INPUT));
         } catch (final Exception e) {
-            LOGGER.severe("An unexpected error occurred during API accessor or JSON parsing: " + e.getMessage());
+            LOGGER.error("An unexpected error occurred during API accessor or JSON parsing: " + e.getMessage());
             throw new UserFilterException("Initialization failed due to unexpected error.", e);
         }
 
@@ -206,9 +209,9 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
                 final ProcessInstance processInstance = processAPI.getProcessInstance(getExecutionContext().getRootProcessInstanceId());
                 userIds.add(processInstance.getStartedBy());
             } catch (final ProcessInstanceNotFoundException e) {
-                LOGGER.severe("Process instance not found for root process ID. Skipping initiator assignment: " + e.getMessage());
+                LOGGER.error("Process instance not found for root process ID. Skipping initiator assignment: " + e.getMessage());
             } catch (final Exception e) {
-                LOGGER.severe("An unexpected error occurred while getting the process initiator: " + e.getMessage());
+                LOGGER.error("An unexpected error occurred while getting the process initiator: " + e.getMessage());
             }
         }
 
@@ -256,7 +259,7 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
                 LOGGER.info(String.format("Found %d users from memberships.", searchResult.getCount()));
 
             } catch (final Exception e) {
-                LOGGER.severe("An error occurred during user search by membership: " + e.getMessage());
+                LOGGER.error("An error occurred during user search by membership: " + e.getMessage());
             }
         }
         LOGGER.info(String.format("Final user list contains %d unique users.", userIds.size()));

@@ -21,6 +21,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import static com.bonitasoft.processbuilder.filter.ActionBasedTaskAssignationFilter.USERS_INPUT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,7 +66,8 @@ class ActionBasedTaskAssignationFilterTest {
     @Mock
     private EngineExecutionContext executionContext;
 
-    private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilterTest.class.getName());
+    //private static final Logger LOGGER = Logger.getLogger(ActionBasedTaskAssignationFilterTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionBasedTaskAssignationFilterTest.class);
 
     /**
      * Sets up the Mockito mocks before each test method.
