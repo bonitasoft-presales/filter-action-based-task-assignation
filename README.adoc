@@ -105,20 +105,20 @@ To deploy and publish this project, we've automated the process using GitHub Act
 
 The CI/CD workflow automatically handles compiling and testing the project every time changes are pushed to a branch.
 
-To publish the filter and make it available for the presales team, simply follow these two steps:
+To publish the library and make it available, simply trigger the `Tag and Release` workflow in the GitHub web interface. This will:
 
-1.  **Create a tag**: Add a tag to the `master` branch (for example, `v1.0.0`).
-2.  **Create a release**: In GitHub, go to the releases section and create a new release from the tag you just created.
+* Increment the project version in the `pom.xml`.
+* Create a Git tag for the new version.
+* Generate the final artifact and attach it to a new GitHub release.
+* Publish the artifact to the GitHub Package Registry.
 
-This will trigger a GitHub Action that compiles the project, generates the final artifact, and attaches it to the release.
-
-If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio.
+If you need to test the `.jar` locally, you can manually install it in your Bonita Studio project. To do this, please refer to the Bonita documentation on managing extensions. To do this, please refer to the https://documentation.bonitasoft.com/bonita/latest/managing-extension-studio.
 
 === Documentation
 
 This project uses Maven to build the application and generate its documentation. The process automatically creates API documentation and a code coverage report, which can be viewed both locally and online.
 
-### Building the Project
+==== Building the Project
 
 To build the project and generate all reports locally, run the following command from the project root directory:
 
@@ -132,7 +132,7 @@ This command performs several key actions:
 2.  verify: Compiles the code, runs all unit tests, and verifies the project's quality.
 3.  site: Generates the documentation site, including Javadoc and JaCoCo reports, into the target/site directory.
 
-### Activating GitHub Pages for Documentation
+==== Activating GitHub Pages for Documentation
 To view the Javadoc documentation and JaCoCo reports online, you must first enable GitHub Pages in your repository. This is a one-time configuration.
 
 Follow these steps to enable the deployment of your documentation via GitHub Actions:
@@ -144,7 +144,7 @@ Follow these steps to enable the deployment of your documentation via GitHub Act
 
 After a successful CI/CD workflow run, your documentation will be available online.
 
-### Accessing Reports and Documentation
+==== Accessing Reports and Documentation
 You can access the generated reports and documentation in two ways:
 
 1. **Local Access**
@@ -175,8 +175,10 @@ To begin contributing, create a branch from master and name it using the ID of t
 ```bash
 # Create and switch to your new branch
 git checkout -b <jira-ticket-id>_<short-description> master
-If the develop branch does not already exist, create it from master and push it to the repository.
 ```
+
+If the develop branch does not already exist, create it from master and push it to the repository.
+
 
 ```bash
 git checkout -b develop master
