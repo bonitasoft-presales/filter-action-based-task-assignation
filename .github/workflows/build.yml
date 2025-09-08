@@ -34,6 +34,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Sets the execute permission on the Maven Wrapper scripts (mvnw and mvnw.cmd) to avoid a "Permission denied" error during the build step.
+      - name: Make Maven Wrapper executable
+        run: |
+          chmod +x mvnw
+          chmod +x mvnw.cmd
+
       # Sets up the Java Development Kit (JDK) and Maven environment.
       # 'temurin' is a common and reliable distribution.
       # 'server-id' and 'cache' help with Maven's dependency management.
