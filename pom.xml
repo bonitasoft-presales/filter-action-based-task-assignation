@@ -302,6 +302,7 @@
                 <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
                     <configLocation>src/main/resources/checkstyle.xml</configLocation>
+                    <includes>**/*.java</includes>
                     <excludes>**/*.properties</excludes>
                 </configuration>
                 <reportSets>

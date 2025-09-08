@@ -120,7 +120,8 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
             validateMemberships(memberShipsNode);
 
         } catch (Exception e) {
-            throw new ConnectorValidationException(String.format("Invalid JSON structure for parameter '%s' - ERROR: '%s'.", inputName, e.getMessage()));
+            throw new ConnectorValidationException(String.format("Invalid JSON structure for parameter '%s' - ERROR: '%s'."
+                , inputName, e.getMessage()));
         }
     }
 
@@ -161,7 +162,8 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
      * @param errorMessageField The name of the field to use in the error message.
      * @throws ConnectorValidationException if the field is missing or has an invalid type.
      */
-    private void validateField(final JsonNode parentNode, final  String fieldName, final  java.util.function.Predicate<JsonNode> typeCheck, final  String errorMessageField) throws ConnectorValidationException {
+    private void validateField(final JsonNode parentNode, final  String fieldName, final  java.util.function.Predicate<JsonNode> typeCheck
+        , final  String errorMessageField) throws ConnectorValidationException {
         JsonNode fieldNode = parentNode.get(fieldName);
 
         Optional.ofNullable(fieldNode)
@@ -318,7 +320,8 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
                                         if (memberShipsRefNode != null && !memberShipsRefNode.isNull() && !memberShipsRefNode.isTextual()) {
                                             throw new IllegalArgumentException("Failed to parse JSON string. Invalid format.");
                                         }
-                                        String memberShipsRef = (memberShipsRefNode != null && memberShipsRefNode.isTextual()) ? memberShipsRefNode.asText() : null;
+                                        String memberShipsRef = (memberShipsRefNode != null && memberShipsRefNode.isTextual()) ? 
+                                                                    memberShipsRefNode.asText() : null;
 
                                         return new Membership(groupId, roleId, memberShipsRef);
                                     })
