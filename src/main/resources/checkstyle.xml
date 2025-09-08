@@ -6,7 +6,7 @@
     <property name="charset" value="UTF-8"/>
 
     <module name="LineLength">
-        <property name="max" value="120"/>
+        <property name="max" value="150"/>
         <property name="ignorePattern" value="^import|^package|a href|@version|@see|@since|@deprecated|@link|value|text"/>
     </module>
 

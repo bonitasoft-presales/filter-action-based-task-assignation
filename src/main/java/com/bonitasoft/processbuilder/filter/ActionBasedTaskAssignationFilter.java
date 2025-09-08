@@ -346,6 +346,9 @@ public class ActionBasedTaskAssignationFilter extends AbstractUserFilter {
         /**
          * The compact constructor for this record. It creates defensive copies
          * of the mutable lists to ensure the record's immutability.
+         * @param initiator a boolean indicating if the process initiator should be included
+         * @param users a list of user IDs directly specified for the task
+         * @param memberships a list of memberships to find candidate users
          */
         public InvolvedUsersData {
             users = new ArrayList<>(users);
