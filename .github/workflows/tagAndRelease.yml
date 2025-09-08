@@ -26,7 +26,9 @@ jobs:
           git config user.name "GitHub Actions"
 
       - name: Build and test
-        run: ./mvnw clean verify
+        run: |
+          chmod +x mvnw
+          ./mvnw clean verify
 
       - name: Clean workspace
         run: git clean -fdX
@@ -78,6 +80,7 @@ jobs:
         id: build-and-test
         run: |
           echo "build ${{ steps.previous-tag.outputs.tag }}"
+          chmod +x mvnw
           ./mvnw clean verify
 
       - name: Get version from pom
@@ -129,6 +132,8 @@ jobs:
           asset_content_type: application/zip
 
       - name: Publish to Github Package
-        run: ./mvnw --batch-mode deploy -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
+        run: |
+            chmod +x mvnw
+            ./mvnw --batch-mode deploy -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
