@@ -4,7 +4,7 @@
 
     <groupId>com.bonitasoft.processbuilder.filter</groupId>
     <artifactId>filter-action-based-task-assignment</artifactId>
-    <version>0.0.14</version>
+    <version>0.0.15-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>filter-action-based-task-assignment</name>
     <url>https://bonitasoft-presales.github.io/filter-action-based-task-assignation/summary.html</url>
@@ -368,7 +368,7 @@
         <url>https://github.com/${github.owner}/${github.repo}</url>
         <developerConnection>scm:git:${project.scm.url}.git</developerConnection>
         <connection>scm:git:${project.scm.url}.git</connection>
-        <tag>v0.0.14</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
