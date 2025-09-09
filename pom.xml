@@ -6,7 +6,7 @@
     <artifactId>filter-action-based-task-assignment</artifactId>
     <version>0.0.15-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>filter-action-based-task-assignment</name>
+    <name>Filter action based task assignment</name>
     <url>https://bonitasoft-presales.github.io/filter-action-based-task-assignation/summary.html</url>
     <description>A library to retrieve task candidates from the users attribute of the form object within the actions object of a PBAction type.</description>
 
