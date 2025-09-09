@@ -33,6 +33,9 @@ jobs:
       - name: Clean workspace
         run: git clean -fdX
 
+      - name: Clean mvnw changes
+        run: git checkout -- mvnw
+
       - name: Run Maven Release Prepare
         run: ./mvnw --batch-mode release:prepare -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
         env:
