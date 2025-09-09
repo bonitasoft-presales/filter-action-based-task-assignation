@@ -37,7 +37,9 @@ jobs:
         run: git checkout -- mvnw
 
       - name: Run Maven Release Prepare
-        run: ./mvnw --batch-mode release:prepare -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
+        run: |
+          chmod +x mvnw
+          ./mvnw --batch-mode release:prepare -Dgithub.owner=${{ github.repository_owner }} -Dgithub.repo=${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -89,6 +91,7 @@ jobs:
       - name: Get version from pom
         id: get-version
         run: |
+          chmod +x mvnw
           VERSION=$( ./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout )
           FINAL_NAME=$( ./mvnw help:evaluate -Dexpression=project.build.finalName -q -DforceStdout )
           echo "::set-output name=version::$VERSION"
