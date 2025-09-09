@@ -192,9 +192,12 @@
                 <version>${maven-release-plugin.version}</version>
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <scmCommentPrefix>@Release: </scmCommentPrefix>
                     <indentSize>4</indentSize>
                     <checkModificationExcludes>
                         <checkModificationExclude>target/**</checkModificationExclude>
+                        <checkModificationExclude>mvnw</checkModificationExclude>
+                        <checkModificationExclude>mvnw.cmd</checkModificationExclude>
                     </checkModificationExcludes>
                 </configuration>
             </plugin>
