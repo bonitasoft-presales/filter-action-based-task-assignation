@@ -39,6 +39,9 @@ jobs:
       - name: Clean mvnw changes
         run: git checkout -- mvnw
 
+      - name: Force file mode on mvnw
+        run: git update-index --chmod=+x mvnw
+        
       - name: Run Maven Release Prepare
         run: |
           chmod +x mvnw
@@ -71,6 +74,18 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
 
+      - name: Force a hard reset to remove all local changes
+        run: git reset --hard
+
+      - name: Clean workspace
+        run: git clean -fdX
+
+      - name: Clean mvnw changes
+        run: git checkout -- mvnw
+
+      - name: Force file mode on mvnw
+        run: git update-index --chmod=+x mvnw
+        
       - name: 'Get Previous tag'
         id: previous-tag
         uses: "WyriHaximus/github-action-get-previous-tag@master"
