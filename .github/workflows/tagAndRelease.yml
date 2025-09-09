@@ -30,6 +30,9 @@ jobs:
           chmod +x mvnw
           ./mvnw clean verify
 
+      - name: Force a hard reset to remove all local changes
+        run: git reset --hard
+
       - name: Clean workspace
         run: git clean -fdX
 
