@@ -6,7 +6,7 @@
     <category icon="icon.png" id="Custom"/> <!-- The category of this definition, used in the Studio -->
   
     <!-- Actor filter inputs -->
-    <input mandatory="true" name="usersList" type="java.lang.Long" />    
+    <input mandatory="true" name="usersList" type="java.util.List" />    
     
     <!--
        Pages and widgets to use the actorfilter in the Bonita Studio.
