@@ -4,7 +4,7 @@
 
     <groupId>com.bonitasoft.processbuilder.filter</groupId>
     <artifactId>multiple-user-ids-actor-filter</artifactId>
-    <version>0.0.16-SNAPSHOT</version>
+    <version>0.0.16</version>
     <packaging>jar</packaging>
     <name>Multiple users</name>
     <url>https://bonitasoft-presales.github.io/filter-action-based-task-assignation/summary.html</url>
@@ -367,7 +367,7 @@
         <url>https://github.com/${github.owner}/${github.repo}</url>
         <developerConnection>scm:git:${project.scm.url}.git</developerConnection>
         <connection>scm:git:${project.scm.url}.git</connection>
-        <tag>HEAD</tag>
+        <tag>v0.0.16</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
