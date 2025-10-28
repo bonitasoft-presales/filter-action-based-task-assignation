@@ -7,7 +7,7 @@
     <version>0.0.17-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Multiple users</name>
-    <url>https://bonitasoft-presales.github.io/filter-action-based-task-assignation/summary.html</url>
+    <url>https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/summary.html</url>
     <description>Bonita Actor Filter that assigns task candidates based on a list of multiple user IDs.</description>
 
     
