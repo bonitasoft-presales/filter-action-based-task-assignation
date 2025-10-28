@@ -90,12 +90,12 @@ To create a new release, you don't need to manually update the version in the `p
 To build the project in your local environment, follow these steps. This is useful for development and testing before publishing.
 
 ```bash
-git clone https://github.com/your-username/filter-action-based-task-assignment.git
-cd filter-action-based-task-assignment/
+git clone https://github.com/your-username/multiple-user-ids-actor-filter.git
+cd multiple-user-ids-actor-filter/
 ./mvnw clean package
 ```
 
-Once the command is executed, the `filter-action-based-task-assignment-1.0.jar` artifact is created inside the `target/` directory. This process compiles the code, runs tests, and packages the filter into a `.jar` file.
+Once the command is executed, the `multiple-user-ids-actor-filter-1.0.jar` artifact is created inside the `target/` directory. This process compiles the code, runs tests, and packages the filter into a `.jar` file.
 
 For more details about Apache Maven, you can refer to its (https://maven.apache.org/guides/getting-started/.
 

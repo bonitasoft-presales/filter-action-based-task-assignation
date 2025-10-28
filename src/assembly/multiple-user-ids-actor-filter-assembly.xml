@@ -12,7 +12,7 @@
             <outputDirectory />
             <directory>target/classes</directory>
             <includes>
-                <include>filter-action-based-task-assignment.impl</include>
+                <include>multiple-user-ids-actor-filter.impl</include>
                 <include>classpath</include>
             </includes>
         </fileSet>

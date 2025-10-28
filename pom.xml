@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.bonitasoft.processbuilder.filter</groupId>
-    <artifactId>filter-action-based-task-assignment</artifactId>
-    <version>0.0.15-SNAPSHOT</version>
+    <artifactId>multiple-user-ids-actor-filter</artifactId>
+    <version>0.0.16-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Filter action based task assignment</name>
+    <name>Multiple users</name>
     <url>https://bonitasoft-presales.github.io/filter-action-based-task-assignation/summary.html</url>
-    <description>A library to retrieve task candidates from the users attribute of the form object within the actions object of a PBAction type.</description>
+    <description>Bonita Actor Filter that assigns task candidates based on a list of multiple user IDs.</description>
 
     
     <properties>
@@ -25,10 +25,12 @@
         <definition-version>1.0.0</definition-version>
         <impl-id>${definition-id}-impl</impl-id>
         <impl-version>${project.version}</impl-version>
-        <impl-main-class>com.bonitasoft.processbuilder.filter.ActionBasedTaskAssignationFilter</impl-main-class>
+        <impl-main-class>com.bonitasoft.processbuilder.filter.MultipleUserIdsActorFilter</impl-main-class>
 
         <!-- Bonita -->
         <bonita-runtime.version>10.2.0</bonita-runtime.version>
+
+        <process-builder-extension-library.version>0.0.0.43</process-builder-extension-library.version>
 
         <!-- Tests -->
         <junit-jupiter-engine.version>5.10.1</junit-jupiter-engine.version>
@@ -78,7 +80,12 @@
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.bonitasoft.processbuilder.extension</groupId>
+            <artifactId>process-builder-extension-library</artifactId>
+            <version>${process-builder-extension-library.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- Tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
