@@ -102,6 +102,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_ORGANIZATION: bonitasoft-presales
+          SONAR_PROJECT_KEY: multiple-user-ids-actor-filter
 
       # This step consolidates Javadoc and JaCoCo reports into a single directory
       # for a clean deployment to GitHub Pages.
