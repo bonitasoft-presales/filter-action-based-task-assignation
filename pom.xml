@@ -4,7 +4,7 @@
 
     <groupId>com.bonitasoft.processbuilder.filter</groupId>
     <artifactId>multiple-user-ids-actor-filter</artifactId>
-    <version>0.0.19</version>
+    <version>0.0.20-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Multiple users</name>
     <url>https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/summary.html</url>
@@ -367,7 +367,7 @@
         <url>https://github.com/${github.owner}/${github.repo}</url>
         <developerConnection>scm:git:${project.scm.url}.git</developerConnection>
         <connection>scm:git:${project.scm.url}.git</connection>
-        <tag>v0.0.19</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
