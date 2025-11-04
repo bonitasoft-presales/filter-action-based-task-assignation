@@ -59,10 +59,18 @@ jobs:
           git config user.name "GitHub Actions"
 
       # This is the core build step. It cleans, verifies, and builds the project.
-      # The 'site' goal generates the Javadoc and JaCoCo reports in the 'target/site' directory.
       - name: Build and Test
         run: |
-          ./mvnw clean verify site
+          ./mvnw clean verify 
+
+      - name: Code Analysis
+        run: |
+          ./mvnw spotbugs:check pmd:check checkstyle:check || true
+
+      # The 'site' goal generates the Javadoc and JaCoCo reports in the 'target/site' directory.   
+      - name: Generate Reports
+        run: |
+          ./mvnw site
 
       # Extracts the project version and final build name from the pom.xml
       # and stores them as outputs for use in subsequent steps.

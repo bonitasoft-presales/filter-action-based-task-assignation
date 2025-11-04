@@ -17,7 +17,7 @@
 
 = Action Based Task Assignation Filter
 
-The project **filter-action-based-task-assignation** is a Bonita actor filter designed for the **Bonita {short-bonita-version} ({short-bonita-tech-version})**  version, specifically to be used with the **ProcessBuilder** project. It is written in `java`.
+The project **multiple-user-ids-actor-filter** is a Bonita actor filter designed for the **Bonita {short-bonita-version} ({short-bonita-tech-version})**  version, specifically to be used with the **ProcessBuilder** project. It is written in `java`.
 
 This actor filter's purpose is to dynamically assign task candidates based on the actions or roles defined within the process. It enhances the flexibility and efficiency of task assignments in human tasks by linking them to specific, actionable business logic.
 
@@ -44,6 +44,29 @@ To start developing this project, make sure you have the following tools install
 - A Git client: To clone the repository and contribute your changes.
 
 Once you have everything set up, clone the repository and navigate to the project directory to start working.
+
+== Security Considerations
+
+This actor filter validates input strictly to prevent injection attacks:
+
+* Input must be a non-empty List<Long>
+* All elements are validated as Long type
+* Null values are rejected
+* Type checking is performed
+
+== Performance Characteristics
+
+* O(1) validation time (only checks first element type)
+* O(n) filter time (returns list as-is)
+* No database queries
+* Suitable for high-volume task assignments
+
+== Known Limitations
+
+* Only supports Long user IDs
+* Requires pre-validation of user existence
+* No group or role expansion
+* Single-threaded execution
 
 === Project Versioning
 
@@ -157,9 +180,9 @@ To view the generated reports on your local machine, simply open the correspondi
 2. **Online Access (GitHub Pages)**
 The documentation is automatically deployed to GitHub Pages after a successful workflow run. This provides a clean, web-accessible version of the reports.
 
-* **Project Site Homepage**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/
-* **Javadoc API Documentation**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/apidocs/index.html
-* **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/jacoco/index.html
+* **Project Site Homepage**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/
+* **Javadoc API Documentation**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/apidocs/index.html
+* **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/jacoco/index.html
 
 The JaCoCo report provides a detailed view of your test coverage, highlighting which lines of code were executed by your unit tests and which were not.
 
@@ -189,12 +212,12 @@ Once your work is complete, submit a pull request to the develop branch. Please 
 
 
 == Links
-  * **Project homepage**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation
-  * **Repository**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation.git
-  * **Issue tracker**: https://github.com/bonitasoft-presales/filter-action-based-task-assignation/issues
-  * **Project Site Homepage**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/
-  * **Javadoc API Documentation**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/apidocs/index.html
-  * **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/filter-action-based-task-assignation/jacoco/index.html
+  * **Project homepage**: https://github.com/bonitasoft-presales/multiple-user-ids-actor-filter
+  * **Repository**: https://github.com/bonitasoft-presales/multiple-user-ids-actor-filter.git
+  * **Issue tracker**: https://github.com/bonitasoft-presales/multiple-user-ids-actor-filter/issues
+  * **Project Site Homepage**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/
+  * **Javadoc API Documentation**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/apidocs/index.html
+  * **JaCoCo Code Coverage Report**: https://bonitasoft-presales.github.io/multiple-user-ids-actor-filter/jacoco/index.html
 
 To build the project in your local environment (useful for development and testing), follow these steps:
 
