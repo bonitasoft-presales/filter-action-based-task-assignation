@@ -52,7 +52,7 @@
         <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
         <spotbugs-maven-plugin.version>4.9.4.1</spotbugs-maven-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-         <!-- SonarQube / SonarCloud -->
+         <!-- SonarQube / SonarCloud 
         <sonar.projectKey>bonitasoft-presales_multiple-user-ids-actor-filter</sonar.projectKey>
         <sonar.organization>bonitasoft-presales</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -60,7 +60,7 @@
         <sonar.tests>src/test/java</sonar.tests>
         <sonar.java.source>17</sonar.java.source>
         <sonar.java.target>17</sonar.java.target>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>-->
     </properties>
 
     <dependencyManagement>
