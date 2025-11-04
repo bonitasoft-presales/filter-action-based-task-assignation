@@ -126,18 +126,13 @@ public class MultipleUserIdsActorFilter extends AbstractUserFilter {
         // Retrieve the parameter. We assume it is a non-null, non-empty List<Long> due to validation.
         final Object usersListInput = getInputParameter(USERS_LIST_INPUT);
         
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Filter called for actor '{}'. Processing input '{}'.", actorName, USERS_LIST_INPUT);
-        }
-
+        LOGGER.info("Filter called for actor '{}'. Processing input '{}'.", actorName, USERS_LIST_INPUT);
         try {
             // Direct cast is safe because validateInputParameters() was executed first.
             @SuppressWarnings("unchecked")
             List<Long> userIds = (List<Long>) usersListInput;
             
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Successfully retrieved and returning {} user IDs for actor '{}'.", userIds.size(), actorName);
-            }
+            LOGGER.debug("Successfully retrieved and returning {} user IDs for actor '{}'.", userIds.size(), actorName);
             return userIds;
 
         } catch (final Exception e) {
@@ -146,4 +141,5 @@ public class MultipleUserIdsActorFilter extends AbstractUserFilter {
             throw new UserFilterException(ERR_FILTER_FAILED, e);
         }
     }
+
 }

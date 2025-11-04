@@ -181,20 +181,27 @@ class FilterTests {
     }
 
     /**
-     * Error case: Null input - filter returns null without exception
-     * This is expected behavior since validation should be called first
+     * Error case: Null input - should throw UserFilterException
+     * Validation should be called first to prevent this, but if it's not,
+     * the filter method will catch the NullPointerException and wrap it
      */
     @Test
-    @DisplayName("Should return null when parameter is null (validation should prevent this)")
-    void testFilterNullParameter() throws UserFilterException {
+    @DisplayName("Should throw UserFilterException when parameter is null")
+    void testFilterNullParameter() {
         // Arrange
         ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter(null);
 
-        // Act
-        List<Long> result = filter.filter("testActor");
-
-        // Assert - Returns null because validation wasn't called
-        assertNull(result, "Should return null when parameter is null");
+        // Act & Assert
+        UserFilterException exception = assertThrows(
+            UserFilterException.class,
+            () -> filter.filter("testActor"),
+            "Should throw UserFilterException when parameter is null"
+        );
+        
+        // Verify exception details
+        assertNotNull(exception.getCause(), "Exception should have a cause");
+        assertTrue(exception.getMessage().contains("Failed to process validated user list input"),
+            "Error message should describe the failure");
     }
 
     /**
@@ -216,5 +223,99 @@ class FilterTests {
         assertEquals(userIds, result1);
         assertEquals(userIds, result2);
         assertEquals(userIds, result3);
+    }
+
+    /**
+     * Error case: Integer instead of Long
+     */
+    @Test
+    @DisplayName("Should throw UserFilterException when data type is Integer instead of List")
+    void testFilterWithIntegerData() {
+        // Arrange
+        ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter(12345);
+
+        // Act & Assert
+        UserFilterException exception = assertThrows(
+            UserFilterException.class,
+            () -> filter.filter("testActor")
+        );
+        
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getMessage().contains("Failed to process validated user list input"));
+    }
+
+    /**
+     * Error case: HashMap instead of List
+     */
+    @Test
+    @DisplayName("Should throw UserFilterException when data is HashMap instead of List")
+    void testFilterWithHashMapData() {
+        // Arrange
+        ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter(new java.util.HashMap<String, Long>());
+
+        // Act & Assert
+        UserFilterException exception = assertThrows(
+            UserFilterException.class,
+            () -> filter.filter("testActor")
+        );
+        
+        assertNotNull(exception.getCause());
+    }
+
+    /**
+     * Success case: Boundary values
+     */
+    @Test
+    @DisplayName("Should handle Long boundary values")
+    void testFilterWithBoundaryValues() throws UserFilterException {
+        // Arrange
+        List<Long> boundaryValues = Arrays.asList(Long.MIN_VALUE, -1L, 0L, 1L, Long.MAX_VALUE);
+        ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter(boundaryValues);
+
+        // Act
+        List<Long> result = filter.filter("boundaryActor");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(5, result.size());
+        assertEquals(boundaryValues, result);
+    }
+
+    /**
+     * Success case: Test logging with various scenarios
+     */
+    @Test
+    @DisplayName("Should handle logging in successful filter execution")
+    void testFilterLoggingOnSuccess() throws UserFilterException {
+        // Arrange - This test ensures the LOGGER.info and LOGGER.debug lines execute
+        List<Long> userIds = Arrays.asList(1L, 2L, 3L);
+        ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter(userIds);
+
+        // Act
+        List<Long> result = filter.filter("loggingTestActor");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        // The logging itself is verified by code coverage, not assertions
+    }
+
+    /**
+     * Error case: Test exception handling and logging
+     */
+    @Test
+    @DisplayName("Should handle exception logging when cast fails")
+    void testFilterExceptionLogging() {
+        // Arrange - This test ensures the LOGGER.error line in catch block executes
+        ((TestableMultipleUserIdsActorFilter) filter).setStoredParameter("invalid");
+
+        // Act & Assert
+        UserFilterException exception = assertThrows(
+            UserFilterException.class,
+            () -> filter.filter("exceptionTestActor")
+        );
+        
+        assertNotNull(exception);
+        // The exception logging in catch block is verified by code coverage
     }
 }
